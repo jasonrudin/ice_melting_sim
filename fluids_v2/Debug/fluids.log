@@ -1,0 +1,103 @@
+﻿Build started 2/23/2014 2:51:41 PM.
+     1>Project "C:\Users\Jason\Documents\Senior Design\fluids_v2\fluids.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "Debug\fluids.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Ifluids /Icommon /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D FREEGLUT_STATIC /D _VC80_UPGRADE=0x0700 /D _MBCS /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt fluids\fluid_system.cpp
+         fluid_system.cpp
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(145): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(245): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(248): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(249): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(250): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(253): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(272): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(276): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(276): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(276): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(283): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(283): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(283): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(288): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(293): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(293): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(293): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(296): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(300): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(300): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(300): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(309): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(309): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(309): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(315): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(315): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(315): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(324): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(324): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(324): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(334): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(334): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(334): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(343): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(343): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(343): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(383): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(384): warning C4305: '=' : truncation from 'double' to 'float'
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(620): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(624): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(625): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(684): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(685): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(700): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(701): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(703): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(726): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(739): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(740): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(784): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(785): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(786): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(805): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(836): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(837): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(838): warning C4244: '+=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(861): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(862): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(864): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(879): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\fluids_v2\fluids\fluid_system.cpp(881): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+       ManifestResourceCompile:
+         All outputs are up-to-date.
+       Link:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Jason\Documents\Senior Design\fluids_v2\Debug\fluids.exe" /INCREMENTAL /NOLOGO /LIBPATH:"C:\Program Files\NVIDIA Corporation\Cg\lib" glee_2008.lib freeglut_VS2008.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\fluids.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Jason\Documents\Senior Design\fluids_v2\Debug\cgdemo.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE:NO /IMPLIB:"C:\Users\Jason\Documents\Senior Design\fluids_v2\Debug\fluids.lib" /MACHINE:X86 Debug\fluids.exe.embed.manifest.res
+         Debug\fluid.obj
+         Debug\fluid_system.obj
+         Debug\geomx.obj
+         Debug\gl_helper.obj
+         Debug\image.obj
+         Debug\matrix.obj
+         Debug\mdebug.obj
+         Debug\mtime.obj
+         Debug\point_set.obj
+         Debug\vector.obj
+         Debug\main.obj
+         glee_2008.lib(GLee.obj) : MSIL .netmodule or module compiled with /GL found; restarting link with /LTCG; add /LTCG to the link command line to improve linker performance
+     1>LINK : warning LNK4075: ignoring '/INCREMENTAL' due to '/LTCG' specification
+     1>LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
+         Generating code
+         Finished generating code
+     1>glee_2008.lib(GLee.obj) : warning LNK4099: PDB 'vc90.pdb' was not found with 'glee_2008.lib(GLee.obj)' or at 'C:\Users\Jason\Documents\Senior Design\fluids_v2\Debug\vc90.pdb'; linking object as if no debug info
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /out:"Debug\fluids.exe.embed.manifest" /manifest Debug\fluids.exe.intermediate.manifest
+         All outputs are up-to-date.
+       LinkEmbedManifest:
+         All outputs are up-to-date.
+         fluids.vcxproj -> C:\Users\Jason\Documents\Senior Design\fluids_v2\Debug\fluids.exe
+       FinalizeBuildStatus:
+         Deleting file "Debug\fluids.unsuccessfulbuild".
+         Touching "Debug\fluids.lastbuildstate".
+     1>Done Building Project "C:\Users\Jason\Documents\Senior Design\fluids_v2\fluids.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:03.22
