@@ -26,6 +26,7 @@
 	#include "vector.h"
 
 	#include "common_defs.h"
+	#include "../definitions.h"
 
 	struct Fluid {
 	public:
@@ -42,6 +43,9 @@
 
 		//My additions for ice
 		float			temp;
+		float			total_surrounding_heat;
+		State			state;
+        float           mass;
 	};
 
 #endif /*PARTICLE_H_*/

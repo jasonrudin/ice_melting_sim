@@ -33,12 +33,15 @@
 #include "common_defs.h"
 #include "mtime.h"
 #include "fluid_system.h"
+#include "../definitions.h"
 
 #ifdef BUILD_CUDA
 	#include "fluid_system_host.cuh"
 #endif
 
 #define EPSILON			0.00001f			//for collision detection
+
+
 
 FluidSystem::FluidSystem ()
 {
@@ -65,7 +68,10 @@ void FluidSystem::Initialize ( int mode, int total )
 	AddAttribute ( 0, "next", sizeof ( Fluid* ), false );
 	AddAttribute ( 0, "tag", sizeof ( bool ), false );	
 
+	AddAttribute ( 0, "total_surrounding_heat", sizeof ( float ), false );
 	AddAttribute ( 0, "temp", sizeof ( float ), false );
+	AddAttribute ( 0, "state", sizeof ( enum State ), false );
+	AddAttribute ( 0, "mass", sizeof ( float ), false );
 		
 	SPH_Setup ();
 	Reset ( total );	
@@ -103,6 +109,8 @@ void FluidSystem::Reset ( int nmax )
 	m_Vec [ EMIT_DANG ].Set ( 0, 0, 0 );
 }
 
+int count = 0;
+
 int FluidSystem::AddPoint ()
 {
 	xref ndx;	
@@ -114,8 +122,13 @@ int FluidSystem::AddPoint ()
 	f->pressure = 0;
 	f->density = 0;
 	f->temp = 20;
+	f->total_surrounding_heat = 0;
+	f->state = WATER;
+	f->mass = MASS;
 	return ndx;
 }
+
+
 
 int FluidSystem::AddPointReuse ()
 {
@@ -133,6 +146,9 @@ int FluidSystem::AddPointReuse ()
 	f->pressure = 0;
 	f->density = 0;
 	f->temp = 20;
+	f->total_surrounding_heat = 0;
+	f->state = WATER;
+	f->mass = MASS;
 	return ndx;
 }
 
@@ -200,6 +216,8 @@ void FluidSystem::Run ()
 			start.SetSystemTime ( ACC_NSEC );
 			SPH_ComputePressureGrid ();
 			if ( bTiming) { stop.SetSystemTime ( ACC_NSEC ); stop = stop - start; printf ( "PRESS: %s\n", stop.GetReadableTime().c_str() ); }
+
+			TemperatureAdvection();
 
 			start.SetSystemTime ( ACC_NSEC );
 			SPH_ComputeForceGridNC ();		
@@ -369,10 +387,39 @@ void FluidSystem::Advance ()
 		vnext *= m_DT/ss;
 		p->pos += vnext;						// p(t+1) = p(t) + v(t+1/2) dt
 
+		//update temperature
+		p->temp = p->temp + p->total_surrounding_heat * m_DT;
+		p->total_surrounding_heat = 0;
+
 		//The default color mode will display color that represents the temperature of the particles
 		if(m_Param[CLR_MODE] == 0){
 			float point_temp = p->temp;
 			p->clr = COLORA(point_temp/100,point_temp/100,point_temp/100,1);
+
+						// Color according to temperature
+			float v = p->temp;
+            float dv = MAX_TEMPERATURE - MIN_TEMPERATURE;
+            float rgba[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+		    //float rgba[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+         
+			if (v < MIN_TEMPERATURE) v = MIN_TEMPERATURE;
+            if (v > MAX_TEMPERATURE) v = MAX_TEMPERATURE;
+
+            if (v < (MIN_TEMPERATURE + 0.25 * dv)) {
+                rgba[0] = 0.0;
+                rgba[1] = 4 * (v - MIN_TEMPERATURE) / dv;
+            } else if (v < (MIN_TEMPERATURE + 0.5 * dv)) {
+                rgba[0] = 0.0;
+                rgba[2] = 1.0 + 4.0 * (MIN_TEMPERATURE + 0.25 * dv - v) / dv;
+            } else if (v < (MIN_TEMPERATURE + 0.75 * dv)) {
+                rgba[0] = 4.0 * (v - MIN_TEMPERATURE - 0.5 * dv) / dv;
+                rgba[2] = 0.0;
+            } else {
+                rgba[1] = 1.0 + 4.0 * (MIN_TEMPERATURE + 0.75 * dv - v) / dv;
+                rgba[2] = 0.0;
+            }
+
+            p->clr = COLORA(rgba[0], rgba[1], rgba[2], rgba[3]);
 		}
 		if ( m_Param[CLR_MODE]==1.0 ) {
 			adj = fabs(vnext.x)+fabs(vnext.y)+fabs(vnext.z) / 7000.0;
@@ -503,6 +550,13 @@ void FluidSystem::SPH_CreateExample ( int n, int nmax )
 		m_Vec [ SPH_INITMIN ].Set ( -5, -35, 0 );
 		m_Vec [ SPH_INITMAX ].Set ( 30, 0, 60 );
 		m_Vec [ PLANE_GRAV_DIR ].Set ( 0.0, 0, -9.8 );
+		break;
+	case 2:		// ICE
+
+		m_Vec [ SPH_VOLMIN ].Set ( -30, -30, 0 );
+		m_Vec [ SPH_VOLMAX ].Set ( 30, 30, 30 );
+		m_Vec [ SPH_INITMIN ].Set ( -10, -10, 2 );
+		m_Vec [ SPH_INITMAX ].Set ( 10, 10, 22 );
 		break;
 	}
 		/*
@@ -711,13 +765,14 @@ void FluidSystem::SPH_ComputePressureGrid ()
 		sum = 0.0;	
 		m_NC[i] = 0;
 
+		//find all of the cells within a radius r from the particle
 		Grid_FindCells ( p->pos, radius );
-		for (int cell=0; cell < 8; cell++) {
-			if ( m_GridCell[cell] != -1 ) {
-				pndx = m_Grid [ m_GridCell[cell] ];				
+		for (int cell=0; cell < 8; cell++) {	//for each potential neighboring cell
+			if ( m_GridCell[cell] != -1 ) {		//if the cell is in range
+				pndx = m_Grid [ m_GridCell[cell] ];			//find the index of the particle in the world grid (as opposed to the local grid)	
 				while ( pndx != -1 ) {					
-					pcurr = (Fluid*) (mBuf[0].data + pndx*mBuf[0].stride);					
-					if ( pcurr == p ) {pndx = pcurr->next; continue; }
+					pcurr = (Fluid*) (mBuf[0].data + pndx*mBuf[0].stride);	 //find the particle				
+					if ( pcurr == p ) {pndx = pcurr->next; continue; }		 //ignores itself
 					dx = ( p->pos.x - pcurr->pos.x)*d;		// dist in cm
 					dy = ( p->pos.y - pcurr->pos.y)*d;
 					dz = ( p->pos.z - pcurr->pos.z)*d;
@@ -726,9 +781,10 @@ void FluidSystem::SPH_ComputePressureGrid ()
 						c =  m_R2 - dsq;
 						sum += c * c * c;
 						if ( m_NC[i] < MAX_NEIGHBOR ) {
-							m_Neighbor[i][ m_NC[i] ] = pndx;
-							m_NDist[i][ m_NC[i] ] = sqrt(dsq);
-							m_NC[i]++;
+							m_Neighbor[i][ m_NC[i] ] = pndx;			//store the index of particle i in an array indexed by the particle and 
+																		//the number neighbor it is
+							m_NDist[i][ m_NC[i] ] = sqrt(dsq);			//store the distance between particle i and the current particle
+							m_NC[i]++;									//increase the number of neighbors for particle i
 						}
 					}
 					pndx = pcurr->next;
@@ -879,11 +935,93 @@ void FluidSystem::SPH_ComputeForceGridNC ()
 			pterm = -0.5f * c * m_SpikyKern * ( p->pressure + pcurr->pressure) / m_NDist[i][j];
 			dterm = c * p->density * pcurr->density;
 			vterm = m_LapKern * visc;
-			force.x += ( pterm * dx + vterm * (pcurr->vel_eval.x - p->vel_eval.x) ) * dterm;
-			force.y += ( pterm * dy + vterm * (pcurr->vel_eval.y - p->vel_eval.y) ) * dterm;
-			force.z += ( pterm * dz + vterm * (pcurr->vel_eval.z - p->vel_eval.z) ) * dterm;
-		}			
+			if(p->state == WATER){
+				force.x += ( pterm * dx + vterm * (pcurr->vel_eval.x - p->vel_eval.x) ) * dterm;
+				force.y += ( pterm * dy + vterm * (pcurr->vel_eval.y - p->vel_eval.y) ) * dterm;
+				force.z += ( pterm * dz + vterm * (pcurr->vel_eval.z - p->vel_eval.z) ) * dterm;
+			}
+		}
+		if(p->state == ICE){
+			force -= m_Vec[PLANE_GRAV_DIR];
+			force *= 1/m_Param[SPH_PMASS];
+		}
+		//p->sph_force = 0;
 		p->sph_force = force;
 	}
 }
 
+void FluidSystem::TemperatureAdvection(){
+char *dat1, *dat1_end;	
+	Fluid *p;
+	Fluid *pcurr;
+	Vector3DF force, fcurr;
+	float SmoothingKernelFunction;
+	float tempDiff, totalNeighborTemp;
+	float heatValue, amountExposed, ambientTempEffect;
+	int i;
+	float c, d;
+	float dx, dy, dz;
+	float mR, mR2, visc;	
+
+	d = m_Param[SPH_SIMSCALE];
+	mR = m_Param[SPH_SMOOTHRADIUS];
+	mR2 = (mR*mR);
+	visc = m_Param[SPH_VISC];
+
+	dat1_end = mBuf[0].data + NumPoints()*mBuf[0].stride;
+	i = 0;
+	totalNeighborTemp = 0;
+	
+	//temperature change between particles
+	for ( dat1 = mBuf[0].data; dat1 < dat1_end; dat1 += mBuf[0].stride, i++ ) {
+		p = (Fluid*) dat1;
+
+		for (int j=0; j < m_NC[i]; j++ ) {
+			pcurr = (Fluid*) (mBuf[0].data + m_Neighbor[i][j]*mBuf[0].stride);
+			dx = ( p->pos.x - pcurr->pos.x)*d;		// dist in cm
+			dy = ( p->pos.y - pcurr->pos.y)*d;
+			dz = ( p->pos.z - pcurr->pos.z)*d;
+
+			//calculate the difference in temperatures
+			tempDiff = pcurr->temp - p->temp;
+			if(abs(tempDiff) < .00001){
+				tempDiff = 0;
+			}
+			c = ( mR - m_NDist[i][j] );
+			SmoothingKernelFunction = -1.0 * c * m_SpikyKern;
+			SmoothingKernelFunction =  45.0f/(3.141592 * pow(PARTICLE_PRADIUS, 6)) * (PARTICLE_PRADIUS - m_NDist[i][j]);
+			totalNeighborTemp = totalNeighborTemp + pcurr->mass * (tempDiff / pcurr->density) * SmoothingKernelFunction;
+
+			if(abs(totalNeighborTemp) < .00001){
+				totalNeighborTemp = 0;
+			}
+		}
+
+		//multiply by relevant thermal diffusion constant
+		if(p->state == WATER){
+			totalNeighborTemp = totalNeighborTemp * WATER_THERMAL_DIFFUSION_CONSTANT;
+		}
+		else{
+			totalNeighborTemp = totalNeighborTemp * ICE_THERMAL_DIFFUSION_CONSTANT;
+		}
+
+		//find temperature change due to surrounding air
+		amountExposed = 1; //need to update this 
+		heatValue = THERMAL_CONDUCTIVITY * (AMBIENT_TEMPERATURE - p->temp) * amountExposed;
+
+		if(p->state == WATER && m_NC[i] < 15){
+			ambientTempEffect = heatValue / (SPECIFIC_HEAT_CAPACITY_WATER * MASS);
+		}
+		else{
+			ambientTempEffect = heatValue / (SPECIFIC_HEAT_CAPACITY_ICE * MASS);
+			ambientTempEffect = 0;
+		}
+
+		if(totalNeighborTemp > 0){
+			int abc = 2;
+		}
+
+		p->total_surrounding_heat = totalNeighborTemp + ambientTempEffect;
+
+	}
+}

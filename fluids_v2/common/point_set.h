@@ -32,6 +32,7 @@
 	#include "common_defs.h"
 	#include "geomx.h"
 	#include "vector.h"	
+	#include "../definitions.h"
 
 	typedef signed int		xref;
 	
@@ -73,7 +74,9 @@
 		Vector3DF		vel;			
 		Vector3DF		vel_eval;		
 		unsigned short	age;
-		float			temp;
+		State			state;
+        float           mass;
+
 	};
 
 	class PointSet : public GeomX {

@@ -81,6 +81,9 @@
     <ClInclude Include="common\vector.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="definitions.h">
+      <Filter>fluids</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="common\matrix.cci">
