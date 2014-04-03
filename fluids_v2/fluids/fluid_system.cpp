@@ -72,6 +72,7 @@ void FluidSystem::Initialize ( int mode, int total )
 	AddAttribute ( 0, "temp", sizeof ( float ), false );
 	AddAttribute ( 0, "state", sizeof ( enum State ), false );
 	AddAttribute ( 0, "mass", sizeof ( float ), false );
+	AddAttribute(0, "index", sizeof(Vector3DI), false);
 		
 	SPH_Setup ();
 	Reset ( total );	
@@ -99,7 +100,7 @@ void FluidSystem::Reset ( int nmax )
 	m_Param [ SPH_VISC ] = 0.2;
 	m_Param [ SPH_INTSTIFF ] = 0.50;
 	m_Param [ SPH_EXTSTIFF ] = 20000;
-	m_Param [ SPH_SMOOTHRADIUS ] = 0.01;
+	m_Param [ SPH_SMOOTHRADIUS ] = 0.0043; //.001
 	
 	m_Vec [ POINT_GRAV_POS ].Set ( 0, 0, 50 );
 	m_Vec [ PLANE_GRAV_DIR ].Set ( 0, 0, -9.8 );
@@ -123,7 +124,7 @@ int FluidSystem::AddPoint ()
 	f->density = 0;
 	f->temp = 20;
 	f->total_surrounding_heat = 0;
-	f->state = WATER;
+	f->state = ICE;
 	f->mass = MASS;
 	return ndx;
 }
@@ -147,7 +148,7 @@ int FluidSystem::AddPointReuse ()
 	f->density = 0;
 	f->temp = 20;
 	f->total_surrounding_heat = 0;
-	f->state = WATER;
+	f->state = ICE;
 	f->mass = MASS;
 	return ndx;
 }
@@ -391,6 +392,12 @@ void FluidSystem::Advance ()
 		p->temp = p->temp + p->total_surrounding_heat * m_DT;
 		p->total_surrounding_heat = 0;
 
+
+		if(p->temp > 32 && p->state == ICE){
+			p->state = WATER;
+			AdjustNeighbors(p);
+		}
+
 		//The default color mode will display color that represents the temperature of the particles
 		if(m_Param[CLR_MODE] == 0){
 			float point_temp = p->temp;
@@ -488,7 +495,7 @@ void FluidSystem::SPH_Setup ()
 	m_Param [ SPH_VISC ] =			0.2;			// pascal-second (Pa.s) = 1 kg m^-1 s^-1  (see wikipedia page on viscosity)
 	m_Param [ SPH_RESTDENSITY ] =	600.0;			// kg / m^3
 	m_Param [ SPH_PMASS ] =			0.00020543;		// kg
-	m_Param [ SPH_PRADIUS ] =		0.004;			// m
+	m_Param [ SPH_PRADIUS ] =		0.002;			//.004 m
 	m_Param [ SPH_PDIST ] =			0.0059;			// m
 	m_Param [ SPH_SMOOTHRADIUS ] =	0.01;			// m 
 	m_Param [ SPH_INTSTIFF ] =		1.00;
@@ -519,39 +526,64 @@ void FluidSystem::SPH_CreateExample ( int n, int nmax )
 	Reset ( nmax );
 	
 	switch ( n ) {
-	case 0:		// Wave pool
+	//case 0:		// Wave pool
 				
-		//-- TEST CASE: 2x2x2 grid, 32 particles.  NOTE: Set PRADIUS to 0.0004 to reduce wall influence
-		//     grid 0:    3*3*2 = 18 particles
-		//     grid 1,2:  3*1*2 =  6 particles
-		//     grid 3:    1*1*2 =  2 particles
-		//     grid 4,5,6:    0 =  0 particles
-		/*m_Vec [ SPH_VOLMIN ].Set ( -2.5, -2.5, 0 );
-		m_Vec [ SPH_VOLMAX ].Set ( 2.5, 2.5, 5.0 );	
-		m_Vec [ SPH_INITMIN ].Set ( -2.5, -2.5, 0 );	
-		m_Vec [ SPH_INITMAX ].Set ( 2.5, 2.5, 1.6 );*/  
-		
+	//	//-- TEST CASE: 2x2x2 grid, 32 particles.  NOTE: Set PRADIUS to 0.0004 to reduce wall influence
+	//	//     grid 0:    3*3*2 = 18 particles
+	//	//     grid 1,2:  3*1*2 =  6 particles
+	//	//     grid 3:    1*1*2 =  2 particles
+	//	//     grid 4,5,6:    0 =  0 particles
+	//	/*m_Vec [ SPH_VOLMIN ].Set ( -2.5, -2.5, 0 );
+	//	m_Vec [ SPH_VOLMAX ].Set ( 2.5, 2.5, 5.0 );	
+	//	m_Vec [ SPH_INITMIN ].Set ( -2.5, -2.5, 0 );	
+	//	m_Vec [ SPH_INITMAX ].Set ( 2.5, 2.5, 1.6 );*/  
+	//	
+	//	m_Vec [ SPH_VOLMIN ].Set ( -30, -30, 0 );
+	//	m_Vec [ SPH_VOLMAX ].Set ( 30, 30, 40 );		
+
+	//	//m_Vec [ SPH_INITMIN ].Set ( -5, -5, 10 );
+	//	//m_Vec [ SPH_INITMAX ].Set ( 5, 5, 20 );
+	//	
+	//	m_Vec [ SPH_INITMIN ].Set ( -20, -26, 10 );
+	//	m_Vec [ SPH_INITMAX ].Set ( 20, 26, 40 );
+
+	//	m_Param [ FORCE_XMIN_SIN ] = 12.0;
+	//	m_Param [ BOUND_ZMIN_SLOPE ] = 0.05;
+	//	break;
+
+	//case 1:		// Large sim
+	//	m_Vec [ SPH_VOLMIN ].Set ( -35, -35, 0 );
+	//	m_Vec [ SPH_VOLMAX ].Set ( 35, 35, 60 );
+	//	m_Vec [ SPH_INITMIN ].Set ( -5, -35, 0 );
+	//	m_Vec [ SPH_INITMAX ].Set ( 30, 0, 60 );
+	//	m_Vec [ PLANE_GRAV_DIR ].Set ( 0.0, 0, -9.8 );
+	//	break;
+	//case 2:		// ICE
+
+	//	m_Vec [ SPH_VOLMIN ].Set ( -30, -30, 0 );
+	//	m_Vec [ SPH_VOLMAX ].Set ( 30, 30, 30 );
+	//	m_Vec [ SPH_INITMIN ].Set ( -10, -10, 2 );
+	//	m_Vec [ SPH_INITMAX ].Set ( 10, 10, 22 );
+	//	break;
+
+	case 0:		// Square Ice
+
+		m_Vec [ SPH_VOLMIN ].Set ( -15, -15, 0 );
+		m_Vec [ SPH_VOLMAX ].Set ( 40, 40, 40 );
+		m_Vec [ SPH_INITMIN ].Set ( 0, 0, 5 );
+		m_Vec [ SPH_INITMAX ].Set ( 35, 35, 35 );
+		voxelGrid = new VoxelGrid("Objects/cube_20.voxels");
+		break;
+
+	case 1:		// Dragon Ice
+
 		m_Vec [ SPH_VOLMIN ].Set ( -30, -30, 0 );
-		m_Vec [ SPH_VOLMAX ].Set ( 30, 30, 40 );		
-
-		//m_Vec [ SPH_INITMIN ].Set ( -5, -5, 10 );
-		//m_Vec [ SPH_INITMAX ].Set ( 5, 5, 20 );
-		
-		m_Vec [ SPH_INITMIN ].Set ( -20, -26, 10 );
-		m_Vec [ SPH_INITMAX ].Set ( 20, 26, 40 );
-
-		m_Param [ FORCE_XMIN_SIN ] = 12.0;
-		m_Param [ BOUND_ZMIN_SLOPE ] = 0.05;
+		m_Vec [ SPH_VOLMAX ].Set ( 30, 30, 30 );
+		m_Vec [ SPH_INITMIN ].Set ( -10, -10, 2 );
+		m_Vec [ SPH_INITMAX ].Set ( 10, 10, 22 );
+		voxelGrid = new VoxelGrid("Objects/dragon.voxels");
 		break;
-
-	case 1:		// Large sim
-		m_Vec [ SPH_VOLMIN ].Set ( -35, -35, 0 );
-		m_Vec [ SPH_VOLMAX ].Set ( 35, 35, 60 );
-		m_Vec [ SPH_INITMIN ].Set ( -5, -35, 0 );
-		m_Vec [ SPH_INITMAX ].Set ( 30, 0, 60 );
-		m_Vec [ PLANE_GRAV_DIR ].Set ( 0.0, 0, -9.8 );
-		break;
-	case 2:		// ICE
+	case 2:		// Bunny Ice
 
 		m_Vec [ SPH_VOLMIN ].Set ( -30, -30, 0 );
 		m_Vec [ SPH_VOLMAX ].Set ( 30, 30, 30 );
@@ -666,6 +698,10 @@ void FluidSystem::SPH_CreateExample ( int n, int nmax )
 	}	
 	*/
 
+	nmax = voxelGrid->theDim[0] * voxelGrid->theDim[1] * voxelGrid->theDim[2];
+	Reset(nmax);
+	SetNeighbors();
+
 	SPH_ComputeKernels ();
 
 	m_Param [ SPH_SIMSIZE ] = m_Param [ SPH_SIMSCALE ] * (m_Vec[SPH_VOLMAX].z - m_Vec[SPH_VOLMIN].z);
@@ -673,7 +709,8 @@ void FluidSystem::SPH_CreateExample ( int n, int nmax )
 
 	float ss = m_Param [ SPH_PDIST ]*0.87 / m_Param[ SPH_SIMSCALE ];	
 	printf ( "Spacing: %f\n", ss);
-	AddVolume ( m_Vec[SPH_INITMIN], m_Vec[SPH_INITMAX], ss );	// Create the particles
+	//AddVolume ( m_Vec[SPH_INITMIN], m_Vec[SPH_INITMAX], ss );	// Create the particles
+	AddVolume ( m_Vec[SPH_INITMIN], m_Vec[SPH_INITMAX], voxelGrid->voxelSize[0], voxelGrid); //create the particles (WHEN LOADING IN)
 
 	float cell_size = m_Param[SPH_SMOOTHRADIUS]*2.0;			// Grid cell size (2r)	
 	Grid_Setup ( m_Vec[SPH_VOLMIN], m_Vec[SPH_VOLMAX], m_Param[SPH_SIMSCALE], cell_size, 1.0 );												// Setup grid
@@ -897,7 +934,13 @@ void FluidSystem::SPH_ComputeForceGrid ()
 				}
 			}
 		}
-		p->sph_force = force;
+
+		if(p->state = WATER){
+			p->sph_force = force;
+		}
+		else{
+			p->sph_force = 0;
+		}
 	}
 }
 
@@ -954,7 +997,6 @@ void FluidSystem::TemperatureAdvection(){
 char *dat1, *dat1_end;	
 	Fluid *p;
 	Fluid *pcurr;
-	Vector3DF force, fcurr;
 	float SmoothingKernelFunction;
 	float tempDiff, totalNeighborTemp;
 	float heatValue, amountExposed, ambientTempEffect;
@@ -970,11 +1012,13 @@ char *dat1, *dat1_end;
 
 	dat1_end = mBuf[0].data + NumPoints()*mBuf[0].stride;
 	i = 0;
-	totalNeighborTemp = 0;
+	
 	
 	//temperature change between particles
 	for ( dat1 = mBuf[0].data; dat1 < dat1_end; dat1 += mBuf[0].stride, i++ ) {
 		p = (Fluid*) dat1;
+		totalNeighborTemp = 0;
+		ambientTempEffect = 0;
 
 		for (int j=0; j < m_NC[i]; j++ ) {
 			pcurr = (Fluid*) (mBuf[0].data + m_Neighbor[i][j]*mBuf[0].stride);
@@ -987,12 +1031,20 @@ char *dat1, *dat1_end;
 			if(abs(tempDiff) < .00001){
 				tempDiff = 0;
 			}
-			c = ( mR - m_NDist[i][j] );
-			SmoothingKernelFunction = -1.0 * c * m_SpikyKern;
-			SmoothingKernelFunction =  45.0f/(3.141592 * pow(PARTICLE_PRADIUS, 6)) * (PARTICLE_PRADIUS - m_NDist[i][j]);
-			totalNeighborTemp = totalNeighborTemp + pcurr->mass * (tempDiff / pcurr->density) * SmoothingKernelFunction;
 
-			if(abs(totalNeighborTemp) < .00001){
+			Vector3DF dist = p->pos;
+            dist -= pcurr->pos;
+            double length = dist.Length();
+
+			c = ( mR - m_NDist[i][j] );
+			//SmoothingKernelFunction = -1.0 * c * m_SpikyKern;
+			//SmoothingKernelFunction =  45.0f/(3.141592 * pow(PARTICLE_PRADIUS, 6)) * (PARTICLE_PRADIUS - m_NDist[i][j]);
+			SmoothingKernelFunction =  45.0f/(3.141592 * pow(PARTICLE_PRADIUS, 6)) * (PARTICLE_PRADIUS - length);
+			//totalNeighborTemp = totalNeighborTemp + pcurr->mass * (tempDiff / pcurr->density) * SmoothingKernelFunction;
+			float tempTerm = ((pcurr->temp - p->temp)/pcurr->density);
+			totalNeighborTemp = totalNeighborTemp + m_Param [ SPH_PMASS ] * tempTerm * SmoothingKernelFunction;
+
+			if(abs(totalNeighborTemp) < .000001){
 				totalNeighborTemp = 0;
 			}
 		}
@@ -1006,22 +1058,107 @@ char *dat1, *dat1_end;
 		}
 
 		//find temperature change due to surrounding air
-		amountExposed = 1; //need to update this 
+		amountExposed = 1; //need to update this using a neighbor table and a grid
+		amountExposed = (voxelGrid->voxelSize[0] * voxelGrid->voxelSize[0])*(6.0 - voxelGrid->adjacencyList[p->index.x][p->index.y][p->index.z]);
 		heatValue = THERMAL_CONDUCTIVITY * (AMBIENT_TEMPERATURE - p->temp) * amountExposed;
 
-		if(p->state == WATER && m_NC[i] < 15){
+		if(p->state == WATER){
+			heatValue = THERMAL_CONDUCTIVITY * (AMBIENT_TEMPERATURE - p->temp);
 			ambientTempEffect = heatValue / (SPECIFIC_HEAT_CAPACITY_WATER * MASS);
 		}
 		else{
+			amountExposed = (voxelGrid->voxelSize[0] * voxelGrid->voxelSize[0])*(6.0 - voxelGrid->adjacencyList[p->index.x][p->index.y][p->index.z]);
+			heatValue = THERMAL_CONDUCTIVITY * (AMBIENT_TEMPERATURE - p->temp) * amountExposed;
 			ambientTempEffect = heatValue / (SPECIFIC_HEAT_CAPACITY_ICE * MASS);
-			ambientTempEffect = 0;
+			//ambientTempEffect = 0;
 		}
 
-		if(totalNeighborTemp > 0){
+		if(totalNeighborTemp > 50){
+			int abc = 2;
+		}
+
+		if(ambientTempEffect > 0){
 			int abc = 2;
 		}
 
 		p->total_surrounding_heat = totalNeighborTemp + ambientTempEffect;
 
+		
+
+	}
+}
+
+
+void FluidSystem::SetNeighbors(){
+	short neighbors;
+    voxelGrid->adjacencyList[1][1][1] = 0;
+    for (int i = 0; i < voxelGrid->theDim[0]; i++) {
+        for (int j = 0; j < voxelGrid->theDim[2]; j++) {
+            for (int k = 0; k < voxelGrid->theDim[1]; k++) {
+                neighbors = 0;
+                if (voxelGrid->data[i][j][k]) { // if there is a voxel in that location
+                    if (i > 0 && voxelGrid->data[i-1][j][k]) neighbors++;
+                    if (i < voxelGrid->theDim[0] - 1 && voxelGrid->data[i+1][j][k]) neighbors++;
+
+                    if (j > 0 && voxelGrid->data[i][j-1][k]) neighbors++;
+                    if (j < voxelGrid->theDim[2] - 1 && voxelGrid->data[i][j+1][k]) neighbors++;
+
+                    if (k > 0 && voxelGrid->data[i][j][k-1]) neighbors++;
+                    if (k < voxelGrid->theDim[1] - 1 && voxelGrid->data[i][j][k+1]) neighbors++;
+                } else {
+                    neighbors = -1; //error state
+                }
+                voxelGrid->adjacencyList[i][j][k] = neighbors;
+            }
+        }
+    }
+
+
+}
+
+void FluidSystem::AdjustNeighbors(Fluid* p){
+	int pi = p->index.x;
+	int pj = p->index.y;
+	int pk = p->index.z;
+
+
+	voxelGrid->data[pi][pj][pk] = 0;
+	voxelGrid->adjacencyList[pi][pj][pk] = -1;
+
+    if (pi + 1 < voxelGrid->theDim[0]) voxelGrid->adjacencyList[pi+1][pj][pk]--;
+    if (pi - 1 > 0) voxelGrid->adjacencyList[pi-1][pj][pk]--;
+    if (pj + 1 < voxelGrid->theDim[2]) voxelGrid->adjacencyList[pi][pj+1][pk]--;
+    if (pj - 1 > 0) voxelGrid->adjacencyList[pi][pj-1][pk]--;
+    if (pk + 1 < voxelGrid->theDim[1]) voxelGrid->adjacencyList[pi][pj][pk+1]--;
+    if (pk - 1 > 0) voxelGrid->adjacencyList[pi][pj][pk-1]--;
+
+	p->state = WATER;
+}
+
+void FluidSystem::AddVolume ( Vector3DF min, Vector3DF max, float spacing, VoxelGrid* vgrid)
+{
+	Vector3DF pos;
+	Fluid* p;
+	float dx, dy, dz;
+	dx = max.x-min.x;
+	dy = max.y-min.y;
+	dz = max.z-min.z;
+
+	// temp counter
+	int count = 0;
+	for (float z = min.z; z <= max.z; z += spacing ) {
+		for (float y = min.y; y <= max.y; y += spacing ) {	
+			for (float x = min.x; x <= max.x; x += spacing ) {
+                Vector3DF index = vgrid->inVoxelGrid(x,y,z);
+				if(index.x >= 0 && index.y >= 0 && index.z >= 0){
+					count++;
+					p = (Fluid*)GetPoint ( AddPointReuse () );
+					pos.Set ( x, y, z);
+                    p->index = index;
+					p->pos = pos;
+					p->clr = COLORA( (x-min.x)/dx, (y-min.y)/dy, (z-min.z)/dz, 1);
+				}
+			}
+		}
 	}
 }

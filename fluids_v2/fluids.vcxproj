@@ -104,6 +104,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="common\voxel_grid.cpp" />
     <ClCompile Include="fluids\fluid.cpp" />
     <ClCompile Include="fluids\fluid_system.cpp" />
     <ClCompile Include="common\geomx.cpp" />
@@ -117,6 +118,8 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="common\voxel_file_format.h" />
+    <ClInclude Include="common\voxel_grid.h" />
     <ClInclude Include="definitions.h" />
     <ClInclude Include="fluids\fluid.h" />
     <ClInclude Include="fluids\fluid_system.h" />

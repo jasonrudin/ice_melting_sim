@@ -32,6 +32,7 @@
 
 	#include "point_set.h"
 	#include "fluid.h"
+	#include "voxel_grid.h"
 	
 	// Scalar params
 	#define SPH_SIMSIZE			4
@@ -98,6 +99,11 @@
 		void SPH_ComputeForceGridNC ();				// O(cn) - neighbor table		
 
 		void TemperatureAdvection();				//compute temperature changes using the neighbor table
+
+		void SetNeighbors(); //initialize the number of neighbors
+		void AdjustNeighbors(Fluid*); //Update num of particle neighbors
+		void AddVolume ( Vector3DF, Vector3DF, float, VoxelGrid*); //Adjusted for voxel loading
+		VoxelGrid* voxelGrid; // lay over a grid to compute neighbors
 		
 	private:
 

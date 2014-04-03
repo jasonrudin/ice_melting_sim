@@ -40,6 +40,9 @@
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="common\voxel_grid.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="fluids\fluid.h">
@@ -83,6 +86,12 @@
     </ClInclude>
     <ClInclude Include="definitions.h">
       <Filter>fluids</Filter>
+    </ClInclude>
+    <ClInclude Include="common\voxel_file_format.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="common\voxel_grid.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
