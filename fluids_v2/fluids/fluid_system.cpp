@@ -498,8 +498,8 @@ void FluidSystem::SPH_Setup ()
 	m_Param [ SPH_PRADIUS ] =		0.002;			//.004 m
 	m_Param [ SPH_PDIST ] =			0.0059;			// m
 	m_Param [ SPH_SMOOTHRADIUS ] =	0.01;			// m 
-	m_Param [ SPH_INTSTIFF ] =		1.00;
-	m_Param [ SPH_EXTSTIFF ] =		10000.0;
+	m_Param [ SPH_INTSTIFF ] =		.5;              // 1.00;
+	m_Param [ SPH_EXTSTIFF ] =		 15000; 
 	m_Param [ SPH_EXTDAMP ] =		256.0;
 	m_Param [ SPH_LIMIT ] =			200.0;			// m / s
 
@@ -526,45 +526,6 @@ void FluidSystem::SPH_CreateExample ( int n, int nmax )
 	Reset ( nmax );
 	
 	switch ( n ) {
-	//case 0:		// Wave pool
-				
-	//	//-- TEST CASE: 2x2x2 grid, 32 particles.  NOTE: Set PRADIUS to 0.0004 to reduce wall influence
-	//	//     grid 0:    3*3*2 = 18 particles
-	//	//     grid 1,2:  3*1*2 =  6 particles
-	//	//     grid 3:    1*1*2 =  2 particles
-	//	//     grid 4,5,6:    0 =  0 particles
-	//	/*m_Vec [ SPH_VOLMIN ].Set ( -2.5, -2.5, 0 );
-	//	m_Vec [ SPH_VOLMAX ].Set ( 2.5, 2.5, 5.0 );	
-	//	m_Vec [ SPH_INITMIN ].Set ( -2.5, -2.5, 0 );	
-	//	m_Vec [ SPH_INITMAX ].Set ( 2.5, 2.5, 1.6 );*/  
-	//	
-	//	m_Vec [ SPH_VOLMIN ].Set ( -30, -30, 0 );
-	//	m_Vec [ SPH_VOLMAX ].Set ( 30, 30, 40 );		
-
-	//	//m_Vec [ SPH_INITMIN ].Set ( -5, -5, 10 );
-	//	//m_Vec [ SPH_INITMAX ].Set ( 5, 5, 20 );
-	//	
-	//	m_Vec [ SPH_INITMIN ].Set ( -20, -26, 10 );
-	//	m_Vec [ SPH_INITMAX ].Set ( 20, 26, 40 );
-
-	//	m_Param [ FORCE_XMIN_SIN ] = 12.0;
-	//	m_Param [ BOUND_ZMIN_SLOPE ] = 0.05;
-	//	break;
-
-	//case 1:		// Large sim
-	//	m_Vec [ SPH_VOLMIN ].Set ( -35, -35, 0 );
-	//	m_Vec [ SPH_VOLMAX ].Set ( 35, 35, 60 );
-	//	m_Vec [ SPH_INITMIN ].Set ( -5, -35, 0 );
-	//	m_Vec [ SPH_INITMAX ].Set ( 30, 0, 60 );
-	//	m_Vec [ PLANE_GRAV_DIR ].Set ( 0.0, 0, -9.8 );
-	//	break;
-	//case 2:		// ICE
-
-	//	m_Vec [ SPH_VOLMIN ].Set ( -30, -30, 0 );
-	//	m_Vec [ SPH_VOLMAX ].Set ( 30, 30, 30 );
-	//	m_Vec [ SPH_INITMIN ].Set ( -10, -10, 2 );
-	//	m_Vec [ SPH_INITMAX ].Set ( 10, 10, 22 );
-	//	break;
 
 	case 0:		// Square Ice
 
@@ -572,131 +533,20 @@ void FluidSystem::SPH_CreateExample ( int n, int nmax )
 		m_Vec [ SPH_VOLMAX ].Set ( 40, 40, 40 );
 		m_Vec [ SPH_INITMIN ].Set ( 0, 0, 5 );
 		m_Vec [ SPH_INITMAX ].Set ( 35, 35, 35 );
+		m_Vec [ PLANE_GRAV_DIR ].Set ( 0.0, 0, -9.8 );
 		voxelGrid = new VoxelGrid("Objects/cube_20.voxels");
 		break;
 
 	case 1:		// Dragon Ice
 
-		m_Vec [ SPH_VOLMIN ].Set ( -30, -30, 0 );
-		m_Vec [ SPH_VOLMAX ].Set ( 30, 30, 30 );
-		m_Vec [ SPH_INITMIN ].Set ( -10, -10, 2 );
-		m_Vec [ SPH_INITMAX ].Set ( 10, 10, 22 );
+		m_Vec [ SPH_VOLMIN ].Set ( -15, -15, 0 );
+		m_Vec [ SPH_VOLMAX ].Set ( 40, 40, 40 );
+		m_Vec [ SPH_INITMIN ].Set ( 0, 0, 5 );
+		m_Vec [ SPH_INITMAX ].Set ( 35, 35, 35 );;
 		voxelGrid = new VoxelGrid("Objects/dragon.voxels");
 		break;
-	case 2:		// Bunny Ice
-
-		m_Vec [ SPH_VOLMIN ].Set ( -30, -30, 0 );
-		m_Vec [ SPH_VOLMAX ].Set ( 30, 30, 30 );
-		m_Vec [ SPH_INITMIN ].Set ( -10, -10, 2 );
-		m_Vec [ SPH_INITMAX ].Set ( 10, 10, 22 );
-		break;
 	}
-		/*
-	case 1:		// Dam break
-		m_Vec [ SPH_VOLMIN ].Set ( -30, -14, 0 );
-		m_Vec [ SPH_VOLMAX ].Set ( 30, 14, 60 );
-		m_Vec [ SPH_INITMIN ].Set ( 0, -13, 0 );
-		m_Vec [ SPH_INITMAX ].Set ( 29, 13, 30 );		
-		m_Vec [ PLANE_GRAV_DIR ].Set ( 0.0, 0, -9.8 );
-		break;
-	case 2:		// Dual-Wave pool
-		m_Vec [ SPH_VOLMIN ].Set ( -60, -5, 0 );
-		m_Vec [ SPH_VOLMAX ].Set ( 60, 5, 50 );
-		m_Vec [ SPH_INITMIN ].Set ( -46, -5, 0 );
-		m_Vec [ SPH_INITMAX ].Set ( 46, 5, 15 );
-		m_Param [ FORCE_XMIN_SIN ] = 8.0;
-		m_Param [ FORCE_XMAX_SIN ] = 8.0;
-		m_Vec [ PLANE_GRAV_DIR ].Set ( 0.0, 0, -9.8 );
-		break;
-	case 3:		// Swirl Stream
-		m_Vec [ SPH_VOLMIN ].Set ( -30, -30, 0 );
-		m_Vec [ SPH_VOLMAX ].Set ( 30, 30, 50 );
-		m_Vec [ SPH_INITMIN ].Set ( -30, -30, 0 );
-		m_Vec [ SPH_INITMAX ].Set ( 30, 30, 40 );
-		m_Vec [ EMIT_POS ].Set ( -20, -20, 22 );
-		m_Vec [ EMIT_RATE ].Set ( 1, 4, 0 );
-		m_Vec [ EMIT_ANG ].Set ( 0, 120, 1.5 );
-		m_Vec [ EMIT_DANG ].Set ( 0, 0, 0 );
-		m_Vec [ PLANE_GRAV_DIR ].Set ( 0.0, 0, -9.8 );
-		break;
-	case 4:		// Shockwave
-		m_Vec [ SPH_VOLMIN ].Set ( -60, -15, 0 );
-		m_Vec [ SPH_VOLMAX ].Set ( 60, 15, 50 );
-		m_Vec [ SPH_INITMIN ].Set ( -59, -14, 0 );
-		m_Vec [ SPH_INITMAX ].Set ( 59, 14, 30 );
-		m_Vec [ PLANE_GRAV_DIR ].Set ( 0.0, 0, -9.8 );
-		m_Toggle [ WALL_BARRIER ] = true;
-		m_Toggle [ WRAP_X ] = true;
-		break;
-	case 5:		// Zero gravity
-		m_Vec [ SPH_VOLMIN ].Set ( -40, -40, 0 );
-		m_Vec [ SPH_VOLMAX ].Set ( 40, 40, 50 );
-		m_Vec [ SPH_INITMIN ].Set ( -20, -20, 20 );
-		m_Vec [ SPH_INITMAX ].Set ( 20, 20, 40 );
-		m_Vec [ EMIT_POS ].Set ( -20, 0, 40 );
-		m_Vec [ EMIT_RATE ].Set ( 2, 1, 0 );		
-		m_Vec [ EMIT_ANG ].Set ( 0, 120, 0.25 );
-		m_Vec [ PLANE_GRAV_DIR ].Set ( 0, 0, 0 );
-		m_Param [ SPH_INTSTIFF ] = 0.20;		
-		break;
-	case 6:		// Point gravity		
-		m_Vec [ SPH_VOLMIN ].Set ( -40, -40, 0 );
-		m_Vec [ SPH_VOLMAX ].Set ( 40, 40, 50 );
-		m_Vec [ SPH_INITMIN ].Set ( -20, -20, 20 );
-		m_Vec [ SPH_INITMAX ].Set ( 20, 20, 40 );
-		m_Param [ SPH_INTSTIFF ] = 0.50;		
-		m_Vec [ EMIT_POS ].Set ( -20, 20, 25 );
-		m_Vec [ EMIT_RATE ].Set ( 1, 4, 0 );		
-		m_Vec [ EMIT_ANG ].Set ( -20, 100, 2.0 );
-		m_Vec [ POINT_GRAV_POS ].Set ( 0, 0, 25 );
-		m_Vec [ PLANE_GRAV_DIR ].Set ( 0, 0, 0 );
-		m_Param [ POINT_GRAV ] = 3.5;
-		break;
-	case 7:		// Levy break
-		m_Vec [ SPH_VOLMIN ].Set ( -40, -40, 0 );
-		m_Vec [ SPH_VOLMAX ].Set ( 40, 40, 50 );
-		m_Vec [ SPH_INITMIN ].Set ( 10, -40, 0 );
-		m_Vec [ SPH_INITMAX ].Set ( 40, 40, 50 );
-		m_Vec [ EMIT_POS ].Set ( 34, 27, 16.6 );
-		m_Vec [ EMIT_RATE ].Set ( 2, 9, 0 );		
-		m_Vec [ EMIT_ANG ].Set ( 118, 200, 1.0 );
-		m_Toggle [ LEVY_BARRIER ] = true;
-		m_Param [ BOUND_ZMIN_SLOPE ] = 0.1;
-		m_Vec [ PLANE_GRAV_DIR ].Set ( 0.0, 0, -9.8 );
-		break;
-	case 8:		// Drain
-		m_Vec [ SPH_VOLMIN ].Set ( -20, -20, 0 );
-		m_Vec [ SPH_VOLMAX ].Set ( 20, 20, 50 );
-		m_Vec [ SPH_INITMIN ].Set ( -15, -20, 20 );
-		m_Vec [ SPH_INITMAX ].Set ( 20, 20, 50 );
-		m_Vec [ EMIT_POS ].Set ( -16, -16, 30 );
-		m_Vec [ EMIT_RATE ].Set ( 1, 4, 0 );		
-		m_Vec [ EMIT_ANG ].Set ( -20, 140, 1.8 );
-		m_Toggle [ DRAIN_BARRIER ] = true;
-		m_Vec [ PLANE_GRAV_DIR ].Set ( 0.0, 0, -9.8 );
-		break;
-	case 9:			// Tumbler
-		m_Vec [ SPH_VOLMIN ].Set ( -30, -30, 0 );
-		m_Vec [ SPH_VOLMAX ].Set ( 30, 30, 50 );
-		m_Vec [ SPH_INITMIN ].Set ( 24, -29, 20 );
-		m_Vec [ SPH_INITMAX ].Set ( 29, 29, 40 );
-		m_Param [ SPH_VISC ] = 0.1;		
-		m_Param [ SPH_INTSTIFF ] = 0.50;
-		m_Param [ SPH_EXTSTIFF ] = 8000;
-		//m_Param [ SPH_SMOOTHRADIUS ] = 0.01;
-		m_Param [ BOUND_ZMIN_SLOPE ] = 0.4;
-		m_Param [ FORCE_XMIN_SIN ] = 12.00;
-		m_Vec [ PLANE_GRAV_DIR ].Set ( 0.0, 0, -9.8 );
-		break;	
-	case 10:		// Large sim
-		m_Vec [ SPH_VOLMIN ].Set ( -35, -35, 0 );
-		m_Vec [ SPH_VOLMAX ].Set ( 35, 35, 60 );
-		m_Vec [ SPH_INITMIN ].Set ( -5, -35, 0 );
-		m_Vec [ SPH_INITMAX ].Set ( 30, 0, 60 );
-		m_Vec [ PLANE_GRAV_DIR ].Set ( 0.0, 0, -9.8 );
-		break;
-	}	
-	*/
+
 
 	nmax = voxelGrid->theDim[0] * voxelGrid->theDim[1] * voxelGrid->theDim[2];
 	Reset(nmax);
@@ -947,15 +797,66 @@ void FluidSystem::SPH_ComputeForceGrid ()
 // Compute Forces - Using spatial grid with saved neighbor table. Fastest.
 void FluidSystem::SPH_ComputeForceGridNC ()
 {
+	//char *dat1, *dat1_end;	
+	//Fluid *p;
+	//Fluid *pcurr;
+	//Vector3DF force, fcurr;
+	//register float pterm, vterm, dterm;
+	//int i;
+	//float c, d;
+	//float dx, dy, dz;
+	//float mR, mR2, visc;	
+
+	//d = m_Param[SPH_SIMSCALE];
+	//mR = m_Param[SPH_SMOOTHRADIUS];
+	//mR2 = (mR*mR);
+	//visc = m_Param[SPH_VISC];
+
+	//dat1_end = mBuf[0].data + NumPoints()*mBuf[0].stride;
+	//i = 0;
+	//
+	//for ( dat1 = mBuf[0].data; dat1 < dat1_end; dat1 += mBuf[0].stride, i++ ) {
+	//	p = (Fluid*) dat1;
+
+	//	force.Set ( 0, 0, 0 );
+	//	for (int j=0; j < m_NC[i]; j++ ) {
+	//		pcurr = (Fluid*) (mBuf[0].data + m_Neighbor[i][j]*mBuf[0].stride);
+	//		dx = ( p->pos.x - pcurr->pos.x)*d;		// dist in cm
+	//		dy = ( p->pos.y - pcurr->pos.y)*d;
+	//		dz = ( p->pos.z - pcurr->pos.z)*d;				
+	//		c = ( mR - m_NDist[i][j] );
+	//		pterm = -0.5f * c * m_SpikyKern * ( p->pressure + pcurr->pressure) / m_NDist[i][j];
+	//		dterm = c * p->density * pcurr->density;
+	//		vterm = m_LapKern * visc;
+	//		if(p->state == WATER){
+	//			force.x += ( pterm * dx + vterm * (pcurr->vel_eval.x - p->vel_eval.x) ) * dterm;
+	//			force.y += ( pterm * dy + vterm * (pcurr->vel_eval.y - p->vel_eval.y) ) * dterm;
+	//			force.z += ( pterm * dz + vterm * (pcurr->vel_eval.z - p->vel_eval.z) ) * dterm;
+	//		}
+	//	}
+	//	if(p->state == ICE){
+	//		force -= m_Vec[PLANE_GRAV_DIR];
+	//		force *= 1/m_Param[SPH_PMASS];
+	//	}
+	//	//p->sph_force = 0;
+	//	p->sph_force = force;
+	//}
+
 	char *dat1, *dat1_end;	
-	Fluid *p;
-	Fluid *pcurr;
+    char* dat2;
+	Fluid *p, *pcurr;
 	Vector3DF force, fcurr;
 	register float pterm, vterm, dterm;
 	int i;
+    float edge;
 	float c, d;
 	float dx, dy, dz;
-	float mR, mR2, visc;	
+	float mR, mR2, visc;
+    float length, lap_kern;
+    float neighbor_temp; // new additions to temperature by other particles
+    float sa, Qi, dT; // air contribution to new temperature
+    int pi, pj, pk; 
+   
 
 	d = m_Param[SPH_SIMSCALE];
 	mR = m_Param[SPH_SMOOTHRADIUS];
@@ -963,35 +864,216 @@ void FluidSystem::SPH_ComputeForceGridNC ()
 	visc = m_Param[SPH_VISC];
 
 	dat1_end = mBuf[0].data + NumPoints()*mBuf[0].stride;
+    i = 0;
+	int count = 1; 
+    Vector3DF anti_grav;
+    
+    // Checking the boundary
+    double diff_dist, adj;
+	double stiff = m_Param[SPH_EXTSTIFF];
+	double damp = m_Param[SPH_EXTDAMP];
+	double radius = m_Param[SPH_PRADIUS];
+    double ss = m_Param[SPH_SIMSCALE];
+
+    //bool touch_ground = false;
+   // Vector3DF anti_gravity;
+	Vector3DF ice_force;
+    Vector3DF norm;
+	Vector3DF min = m_Vec[SPH_VOLMIN];
+	Vector3DF max = m_Vec[SPH_VOLMAX];
+	Vector3DF dist;
+	Vector3DF diff;
+	anti_gravity.Set(0.0f, 0.0f, 0.0f);
+
+	// Calculate the anti-gravity force
+ 
+
+	//Vector3DF force_x;
+	//for( dat2 = mBuf[0].data; dat2 < dat1_end; dat2 += mBuf[0].stride) {
+	//	// X-axis walls
+	//	p = (Fluid*) dat2;
+	//	if ( !m_Toggle[WRAP_X] ) {
+	//		diff_dist = 2 * radius - ( p->pos.x - min.x + (sin(m_Time*10.0)-1+(p->pos.y*0.025)*0.25) * m_Param[FORCE_XMIN_SIN] )*ss;	
+	//		if (diff_dist > EPSILON && p->state == ICE) {
+	//			norm.Set ( 1.0, 0, 0 );
+	//			adj = (m_Param[ FORCE_XMIN_SIN ] + 1) * stiff * diff_dist - damp * norm.Dot ( p->vel_eval ) ;
+	//			force_x = norm;
+	//			force_x *= adj;
+	//			force_x /= m_Param[SPH_PMASS];
+	//			anti_gravity += force_x;
+	//			touch_ground = true;
+	//			break;
+	//		}
+	//		diff_dist = 2 * radius - ( max.x - p->pos.x + (sin(m_Time*10.0)-1) * m_Param[FORCE_XMAX_SIN] )*ss;	
+	//		if (diff_dist > EPSILON && p->state == ICE) {
+	//			norm.Set ( -1, 0, 0 );
+	//			adj = (m_Param[ FORCE_XMAX_SIN ]+1) * stiff * diff_dist - damp * norm.Dot ( p->vel_eval );
+	//			force_x = norm;
+	//			force_x *= adj;
+	//			force_x /= m_Param[SPH_PMASS];
+	//			anti_gravity += force_x;
+	//			touch_ground = true;
+	//			break;
+	//		}
+	//	}  // END IF TOGGLE WRAP_X
+	//}  // END FOR LOOP
+
+	//Vector3DF force_y;
+	//for( dat2 = mBuf[0].data; dat2 < dat1_end; dat2 += mBuf[0].stride) {
+	//	// Y-axis walls
+	//	p = (Fluid*) dat2;
+	//	diff_dist = 2 * radius - ( p->pos.y - min.y )*ss;			
+	//	if (diff_dist > EPSILON && p->state == ICE) {
+	//		norm.Set ( 0, 1, 0 );
+	//		adj = stiff * diff_dist - damp * norm.Dot ( p->vel_eval );
+	//		force_y = norm;
+	//		force_y *= adj;
+	//		force_y /= m_Param[SPH_PMASS];
+	//		anti_gravity += force_y;
+	//		touch_ground = true;
+	//		break;
+	//	}
+	//	diff_dist = 2 * radius - ( max.y - p->pos.y )*ss;
+	//	if (diff_dist > EPSILON && p->state == ICE) {
+	//		norm.Set ( 0, -1, 0 );
+	//		adj = stiff * diff_dist - damp * norm.Dot ( p->vel_eval );
+	//		force_y = norm;
+	//		force_y *= adj;
+	//		force_y /= m_Param[SPH_PMASS];
+	//		anti_gravity += force_y;
+	//		touch_ground = true;
+	//		break;
+	//	}
+	//}  // END FOR LOOP
+
+	bool touch_ground = adjustGravity();
+
+
+	// Calculate the ice-water force
+	i = 0;
+	double z_ice_force;
+	bool liquid = false;
+	for ( dat2 = mBuf[0].data; dat2 < dat1_end; dat2 += mBuf[0].stride, ++i) {
+		p = (Fluid*) dat2; 
+		if (p->state == ICE) {
+			for (int j = 0; j < m_NC[i]; ++j) {
+				pcurr = (Fluid*) (mBuf[0].data + m_Neighbor[i][j]*mBuf[0].stride);
+				if (pcurr->state == WATER){
+					dist = pcurr->pos;
+					dist -= p->pos;
+					float length  = dist.Length();
+					dist /= (length * length);
+
+					ice_force.x += ICE_WATER * K_ICE * dist.x;
+					ice_force.y += ICE_WATER * K_ICE * dist.y;
+					z_ice_force += ICE_WATER * K_ICE * dist.z;
+					//ice_force.z += ICE_WATER * K_ICE * dist.z;
+					liquid = true;
+				}
+			}  // END OF FINDING NEIGHBOR FOR-LOOP 
+		}  // END OF IF P->STATE IS SOLID
+	}  // EBD OF PARTICLE FOR-LOOP 	
+	if (liquid) {
+		if (!touch_ground) {
+			double anti_g = 9.8 /(m_Param[SPH_PMASS]);
+			if (z_ice_force > 0 && z_ice_force <= BOUND_LIQUID) {
+				//std::cout << "GREATER FORCE " << std::endl;
+				ice_force.z = anti_g - z_ice_force; //- 500;
+			} else {
+				//std::cout << "Ice _force " << z_ice_force << std::endl;
+				ice_force.z = anti_g - BOUND_LIQUID; //force.z;
+			}
+			// ice_force.z -= force_z;
+		}
+	}
+	// std::cout <<"ice force y " << ice_force.y << std::endl;
+	// ice_force.z -= 700;
+	//std::cout << "Force_z " << ice_force.z << std::endl;
+	//ice_force.z *= 1E-100000;
+	//ice_force.z = 0.0;
+	//ice_force.y = 0.0;
+	//ice_force.x = 0.0;
 	i = 0;
 	
-	for ( dat1 = mBuf[0].data; dat1 < dat1_end; dat1 += mBuf[0].stride, i++ ) {
+    for ( dat1 = mBuf[0].data; dat1 < dat1_end; dat1 += mBuf[0].stride, i++ ) {
+        // reset all instance variables
 		p = (Fluid*) dat1;
+		force.Set (0, 0, 0);
+        /*if (touch_ground && p->state == ICE) {
+			force.Set(anti_gravity.x, anti_gravity.y, anti_gravity.z);
+			force += ice_force;
+        } else if (p->state == ICE) {
+			force += ice_force;  
+        } */
 
-		force.Set ( 0, 0, 0 );
-		for (int j=0; j < m_NC[i]; j++ ) {
-			pcurr = (Fluid*) (mBuf[0].data + m_Neighbor[i][j]*mBuf[0].stride);
-			dx = ( p->pos.x - pcurr->pos.x)*d;		// dist in cm
-			dy = ( p->pos.y - pcurr->pos.y)*d;
-			dz = ( p->pos.z - pcurr->pos.z)*d;				
-			c = ( mR - m_NDist[i][j] );
-			pterm = -0.5f * c * m_SpikyKern * ( p->pressure + pcurr->pressure) / m_NDist[i][j];
-			dterm = c * p->density * pcurr->density;
-			vterm = m_LapKern * visc;
-			if(p->state == WATER){
+		if (touch_ground && p->state == 0) {
+            force.Set(anti_gravity.x, anti_gravity.y, anti_gravity.z);
+        } 
+		else {
+            force.Set (0, 0, 0);
+        }
+
+  //      
+		neighbor_temp = 0.0; sa = 0.0; Qi = 0.0;
+  //      pi = p->index.x;
+  //      pj = p->index.y;
+  //      pk = p->index.z;
+
+  //                  
+        for (int j=0; j < m_NC[i]; j++ ) { 
+			// Loop through all neighbors
+            pcurr = (Fluid*) (mBuf[0].data + m_Neighbor[i][j]*mBuf[0].stride);
+            dx = ( p->pos.x - pcurr->pos.x)*d; // dist in cm
+            dy = ( p->pos.y - pcurr->pos.y)*d;
+            dz = ( p->pos.z - pcurr->pos.z)*d;
+
+            c = ( mR - m_NDist[i][j] ); //distance between current and neighbor?
+            pterm = -0.5f * c * m_SpikyKern * ( p->pressure + pcurr->pressure) / m_NDist[i][j];
+            
+            dterm = c * p->density * pcurr->density;
+
+            vterm = m_LapKern * visc; 
+
+            diff = p->pos; // distance between particle and its neighbor
+            diff -= pcurr->pos;
+            length = diff.Length();
+
+            //lap_kern = m_LapKern * (m_Param[SPH_SMOOTHRADIUS] - length);
+			lap_kern =  45.0f/(3.141592 * pow(PARTICLE_PRADIUS, 6)) * (PARTICLE_PRADIUS - length);
+            //neighbor_temp += m_Param [ SPH_PMASS ] * ((pcurr->temp - p->temp)/pcurr->density) * lap_kern; // Newtonian Heat Transfer
+
+			// Calculate interfacial force 
+            if (p->state == WATER) {
+					
+				dist = pcurr->pos;
+				dist -= p->pos;
+				float length  = dist.Length();
+				dist /= (length * length);
+
+				// Water Particle
 				force.x += ( pterm * dx + vterm * (pcurr->vel_eval.x - p->vel_eval.x) ) * dterm;
 				force.y += ( pterm * dy + vterm * (pcurr->vel_eval.y - p->vel_eval.y) ) * dterm;
 				force.z += ( pterm * dz + vterm * (pcurr->vel_eval.z - p->vel_eval.z) ) * dterm;
-			}
+
+				if (pcurr->state == WATER) {
+					force.x += K_WATER * dist.x;
+					force.y += K_WATER * dist.y;
+					force.z += K_WATER * dist.z;
+				} else { //ICE
+					force.x += K_ICE * dist.x;
+					force.y += K_ICE * dist.y;
+					force.z += K_ICE * dist.z;
+				}
+            }  // END IF p->state is LIQUID
+        }  
+
+		if(force.z > 0){
+			int aadsf = 5;
 		}
-		if(p->state == ICE){
-			force -= m_Vec[PLANE_GRAV_DIR];
-			force *= 1/m_Param[SPH_PMASS];
-		}
-		//p->sph_force = 0;
-		p->sph_force = force;
-	}
+
+        p->sph_force = force;
 }
+	}
 
 void FluidSystem::TemperatureAdvection(){
 char *dat1, *dat1_end;	
@@ -1161,4 +1243,42 @@ void FluidSystem::AddVolume ( Vector3DF min, Vector3DF max, float spacing, Voxel
 			}
 		}
 	}
+}
+
+//Determines the anti-gravity force to apply to particles that are on the ground
+bool FluidSystem::adjustGravity(){
+	Fluid *p;
+	char *dat1_end, *dat2;
+	dat1_end = mBuf[0].data + NumPoints()*mBuf[0].stride;
+
+	// Checking the boundary
+    double diff, adj;
+	double stiff = m_Param[SPH_EXTSTIFF];
+	double damp = m_Param[SPH_EXTDAMP];
+	double radius = m_Param[SPH_PRADIUS];
+    double ss = m_Param[SPH_SIMSCALE];
+
+    bool touch_ground = false;
+    //Vector3DF anti_gravity;
+    Vector3DF norm;
+	Vector3DF min = m_Vec[SPH_VOLMIN];
+	Vector3DF max = m_Vec[SPH_VOLMAX];
+
+	
+
+	for( dat2 = mBuf[0].data; dat2 < dat1_end; dat2 += mBuf[0].stride) {
+    	// Z-axis walls
+        p = (Fluid*) dat2;
+		diff = 2 * radius - ( p->pos.z - min.z - (p->pos.x - m_Vec[SPH_VOLMIN].x) * m_Param[BOUND_ZMIN_SLOPE] )*ss;
+		if (diff > EPSILON && p->state == 0) {			
+			norm.Set ( -m_Param[BOUND_ZMIN_SLOPE], 0, 1.0 - m_Param[BOUND_ZMIN_SLOPE] );
+			adj = stiff * diff - damp * norm.Dot ( p->vel_eval );
+            anti_gravity = norm;
+            anti_gravity *= adj;
+            anti_gravity /= m_Param[SPH_PMASS];
+            touch_ground = true;
+		}
+    }
+
+	return touch_ground;
 }

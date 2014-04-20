@@ -104,6 +104,8 @@
 		void AdjustNeighbors(Fluid*); //Update num of particle neighbors
 		void AddVolume ( Vector3DF, Vector3DF, float, VoxelGrid*); //Adjusted for voxel loading
 		VoxelGrid* voxelGrid; // lay over a grid to compute neighbors
+		bool adjustGravity();
+		Vector3DF anti_gravity;
 		
 	private:
 
