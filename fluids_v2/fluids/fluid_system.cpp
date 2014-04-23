@@ -250,6 +250,7 @@ void FluidSystem::SPH_DrawDomain ()
 	glEnd ();
 }
 
+
 void FluidSystem::Advance ()
 {
 	char *dat1, *dat1_end;
@@ -289,7 +290,7 @@ void FluidSystem::Advance ()
 
 		// Z-axis walls
 		diff = 2 * radius - ( p->pos.z - min.z - (p->pos.x - m_Vec[SPH_VOLMIN].x) * m_Param[BOUND_ZMIN_SLOPE] )*ss;
-		if (diff > EPSILON ) {			
+		if (diff > EPSILON && p->state == WATER ) {			
 			norm.Set ( -m_Param[BOUND_ZMIN_SLOPE], 0, 1.0 - m_Param[BOUND_ZMIN_SLOPE] );
 			adj = stiff * diff - damp * norm.Dot ( p->vel_eval );
 			accel.x += adj * norm.x; accel.y += adj * norm.y; accel.z += adj * norm.z;
@@ -463,6 +464,8 @@ void FluidSystem::Advance ()
 	m_Time += m_DT;
 }
 
+
+
 //------------------------------------------------------ SPH Setup 
 //
 //  Range = +/- 10.0 * 0.006 (r) =	   0.12			m (= 120 mm = 4.7 inch)
@@ -552,7 +555,7 @@ void FluidSystem::SPH_CreateExample ( int n, int nmax )
 	Reset(nmax);
 	SetNeighbors();
 
-	SPH_ComputeKernels ();
+	//SPH_ComputeKernels ();
 
 	m_Param [ SPH_SIMSIZE ] = m_Param [ SPH_SIMSCALE ] * (m_Vec[SPH_VOLMAX].z - m_Vec[SPH_VOLMIN].z);
 	m_Param [ SPH_PDIST ] = pow ( m_Param[SPH_PMASS] / m_Param[SPH_RESTDENSITY], 1/3.0 );	
@@ -628,6 +631,7 @@ void FluidSystem::SPH_ComputePressureSlow ()
 	}
 }
 
+
 // Compute Pressures - Using spatial grid, and also create neighbor table
 void FluidSystem::SPH_ComputePressureGrid ()
 {
@@ -679,13 +683,19 @@ void FluidSystem::SPH_ComputePressureGrid ()
 			}
 			m_GridCell[cell] = -1;
 		}
-		p->density = sum * m_Param[SPH_PMASS] * m_Poly6Kern ;	
-		p->pressure = ( p->density - m_Param[SPH_RESTDENSITY] ) * m_Param[SPH_INTSTIFF];		
+		p->density = sum * m_Param[SPH_PMASS] * m_Poly6Kern ;
+		if(p->state == WATER){
+			p->pressure = ( p->density - m_Param[SPH_RESTDENSITY] ) * m_Param[SPH_INTSTIFF];
+		}
+		else{
+			p->pressure = ( p->density - m_Param[SPH_RESTDENSITY] ) * .3;
+		}
 		p->density = 1.0f / p->density;		
 	}
 }
 
 // Compute Forces - Very slow, but simple. O(n^2)
+
 void FluidSystem::SPH_ComputeForceSlow ()
 {
 	char *dat1, *dat1_end;
@@ -794,6 +804,7 @@ void FluidSystem::SPH_ComputeForceGrid ()
 	}
 }
 
+
 // Compute Forces - Using spatial grid with saved neighbor table. Fastest.
 void FluidSystem::SPH_ComputeForceGridNC ()
 {
@@ -814,11 +825,20 @@ void FluidSystem::SPH_ComputeForceGridNC ()
 
 	dat1_end = mBuf[0].data + NumPoints()*mBuf[0].stride;
 	i = 0;
+
+	//find the correct anti-gravity force
+	bool touch_ground = adjustGravity();
 	
 	for ( dat1 = mBuf[0].data; dat1 < dat1_end; dat1 += mBuf[0].stride, i++ ) {
 		p = (Fluid*) dat1;
 
-		force.Set ( 0, 0, 0 );
+		if (touch_ground && p->state == ICE) {
+            force.Set(anti_gravity.x, anti_gravity.y, anti_gravity.z);
+        } 
+		else {
+            force.Set (0, 0, 0);
+        }
+
 		for (int j=0; j < m_NC[i]; j++ ) {
 			pcurr = (Fluid*) (mBuf[0].data + m_Neighbor[i][j]*mBuf[0].stride);
 			dx = ( p->pos.x - pcurr->pos.x)*d;		// dist in cm
@@ -828,10 +848,25 @@ void FluidSystem::SPH_ComputeForceGridNC ()
 			pterm = -0.5f * c * m_SpikyKern * ( p->pressure + pcurr->pressure) / m_NDist[i][j];
 			dterm = c * p->density * pcurr->density;
 			vterm = m_LapKern * visc;
+			Vector3DF dist = p->pos;
+            dist -= pcurr->pos;
+            float length = dist.Length();
+
 			if(p->state == WATER){
 				force.x += ( pterm * dx + vterm * (pcurr->vel_eval.x - p->vel_eval.x) ) * dterm;
 				force.y += ( pterm * dy + vterm * (pcurr->vel_eval.y - p->vel_eval.y) ) * dterm;
 				force.z += ( pterm * dz + vterm * (pcurr->vel_eval.z - p->vel_eval.z) ) * dterm;
+
+				if (pcurr->state == WATER) {
+					force.x += K_WATER * dist.x;
+					force.y += K_WATER * dist.y;
+					force.z += K_WATER * dist.z;
+				} 
+				else {
+					force.x += K_ICE * dist.x;
+					force.y += K_ICE * dist.y;
+					force.z += K_ICE * dist.z;
+				}
 			}
 		}
 		if(p->state == ICE){
@@ -843,7 +878,9 @@ void FluidSystem::SPH_ComputeForceGridNC ()
 	}
 	}
 
+
 void FluidSystem::TemperatureAdvection(){
+	
 char *dat1, *dat1_end;	
 	Fluid *p;
 	Fluid *pcurr;
@@ -947,6 +984,7 @@ char *dat1, *dat1_end;
 }
 
 
+
 void FluidSystem::SetNeighbors(){
 	short neighbors;
     voxelGrid->adjacencyList[1][1][1] = 0;
@@ -1046,8 +1084,11 @@ bool FluidSystem::adjustGravity(){
     	// Z-axis walls
         p = (Fluid*) dat2;
 		diff = 2 * radius - ( p->pos.z - min.z - (p->pos.x - m_Vec[SPH_VOLMIN].x) * m_Param[BOUND_ZMIN_SLOPE] )*ss;
-		if (diff > EPSILON && p->state == 0) {			
+		if (diff > EPSILON && p->state == 0) {	
+			//sets the normal direction
 			norm.Set ( -m_Param[BOUND_ZMIN_SLOPE], 0, 1.0 - m_Param[BOUND_ZMIN_SLOPE] );
+
+			//amount of "rebound"
 			adj = stiff * diff - damp * norm.Dot ( p->vel_eval );
             anti_gravity = norm;
             anti_gravity *= adj;
