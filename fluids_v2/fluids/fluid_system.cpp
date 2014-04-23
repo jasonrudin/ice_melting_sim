@@ -797,66 +797,15 @@ void FluidSystem::SPH_ComputeForceGrid ()
 // Compute Forces - Using spatial grid with saved neighbor table. Fastest.
 void FluidSystem::SPH_ComputeForceGridNC ()
 {
-	//char *dat1, *dat1_end;	
-	//Fluid *p;
-	//Fluid *pcurr;
-	//Vector3DF force, fcurr;
-	//register float pterm, vterm, dterm;
-	//int i;
-	//float c, d;
-	//float dx, dy, dz;
-	//float mR, mR2, visc;	
-
-	//d = m_Param[SPH_SIMSCALE];
-	//mR = m_Param[SPH_SMOOTHRADIUS];
-	//mR2 = (mR*mR);
-	//visc = m_Param[SPH_VISC];
-
-	//dat1_end = mBuf[0].data + NumPoints()*mBuf[0].stride;
-	//i = 0;
-	//
-	//for ( dat1 = mBuf[0].data; dat1 < dat1_end; dat1 += mBuf[0].stride, i++ ) {
-	//	p = (Fluid*) dat1;
-
-	//	force.Set ( 0, 0, 0 );
-	//	for (int j=0; j < m_NC[i]; j++ ) {
-	//		pcurr = (Fluid*) (mBuf[0].data + m_Neighbor[i][j]*mBuf[0].stride);
-	//		dx = ( p->pos.x - pcurr->pos.x)*d;		// dist in cm
-	//		dy = ( p->pos.y - pcurr->pos.y)*d;
-	//		dz = ( p->pos.z - pcurr->pos.z)*d;				
-	//		c = ( mR - m_NDist[i][j] );
-	//		pterm = -0.5f * c * m_SpikyKern * ( p->pressure + pcurr->pressure) / m_NDist[i][j];
-	//		dterm = c * p->density * pcurr->density;
-	//		vterm = m_LapKern * visc;
-	//		if(p->state == WATER){
-	//			force.x += ( pterm * dx + vterm * (pcurr->vel_eval.x - p->vel_eval.x) ) * dterm;
-	//			force.y += ( pterm * dy + vterm * (pcurr->vel_eval.y - p->vel_eval.y) ) * dterm;
-	//			force.z += ( pterm * dz + vterm * (pcurr->vel_eval.z - p->vel_eval.z) ) * dterm;
-	//		}
-	//	}
-	//	if(p->state == ICE){
-	//		force -= m_Vec[PLANE_GRAV_DIR];
-	//		force *= 1/m_Param[SPH_PMASS];
-	//	}
-	//	//p->sph_force = 0;
-	//	p->sph_force = force;
-	//}
-
 	char *dat1, *dat1_end;	
-    char* dat2;
-	Fluid *p, *pcurr;
+	Fluid *p;
+	Fluid *pcurr;
 	Vector3DF force, fcurr;
 	register float pterm, vterm, dterm;
 	int i;
-    float edge;
 	float c, d;
 	float dx, dy, dz;
-	float mR, mR2, visc;
-    float length, lap_kern;
-    float neighbor_temp; // new additions to temperature by other particles
-    float sa, Qi, dT; // air contribution to new temperature
-    int pi, pj, pk; 
-   
+	float mR, mR2, visc;	
 
 	d = m_Param[SPH_SIMSCALE];
 	mR = m_Param[SPH_SMOOTHRADIUS];
@@ -864,215 +813,34 @@ void FluidSystem::SPH_ComputeForceGridNC ()
 	visc = m_Param[SPH_VISC];
 
 	dat1_end = mBuf[0].data + NumPoints()*mBuf[0].stride;
-    i = 0;
-	int count = 1; 
-    Vector3DF anti_grav;
-    
-    // Checking the boundary
-    double diff_dist, adj;
-	double stiff = m_Param[SPH_EXTSTIFF];
-	double damp = m_Param[SPH_EXTDAMP];
-	double radius = m_Param[SPH_PRADIUS];
-    double ss = m_Param[SPH_SIMSCALE];
-
-    //bool touch_ground = false;
-   // Vector3DF anti_gravity;
-	Vector3DF ice_force;
-    Vector3DF norm;
-	Vector3DF min = m_Vec[SPH_VOLMIN];
-	Vector3DF max = m_Vec[SPH_VOLMAX];
-	Vector3DF dist;
-	Vector3DF diff;
-	anti_gravity.Set(0.0f, 0.0f, 0.0f);
-
-	// Calculate the anti-gravity force
- 
-
-	//Vector3DF force_x;
-	//for( dat2 = mBuf[0].data; dat2 < dat1_end; dat2 += mBuf[0].stride) {
-	//	// X-axis walls
-	//	p = (Fluid*) dat2;
-	//	if ( !m_Toggle[WRAP_X] ) {
-	//		diff_dist = 2 * radius - ( p->pos.x - min.x + (sin(m_Time*10.0)-1+(p->pos.y*0.025)*0.25) * m_Param[FORCE_XMIN_SIN] )*ss;	
-	//		if (diff_dist > EPSILON && p->state == ICE) {
-	//			norm.Set ( 1.0, 0, 0 );
-	//			adj = (m_Param[ FORCE_XMIN_SIN ] + 1) * stiff * diff_dist - damp * norm.Dot ( p->vel_eval ) ;
-	//			force_x = norm;
-	//			force_x *= adj;
-	//			force_x /= m_Param[SPH_PMASS];
-	//			anti_gravity += force_x;
-	//			touch_ground = true;
-	//			break;
-	//		}
-	//		diff_dist = 2 * radius - ( max.x - p->pos.x + (sin(m_Time*10.0)-1) * m_Param[FORCE_XMAX_SIN] )*ss;	
-	//		if (diff_dist > EPSILON && p->state == ICE) {
-	//			norm.Set ( -1, 0, 0 );
-	//			adj = (m_Param[ FORCE_XMAX_SIN ]+1) * stiff * diff_dist - damp * norm.Dot ( p->vel_eval );
-	//			force_x = norm;
-	//			force_x *= adj;
-	//			force_x /= m_Param[SPH_PMASS];
-	//			anti_gravity += force_x;
-	//			touch_ground = true;
-	//			break;
-	//		}
-	//	}  // END IF TOGGLE WRAP_X
-	//}  // END FOR LOOP
-
-	//Vector3DF force_y;
-	//for( dat2 = mBuf[0].data; dat2 < dat1_end; dat2 += mBuf[0].stride) {
-	//	// Y-axis walls
-	//	p = (Fluid*) dat2;
-	//	diff_dist = 2 * radius - ( p->pos.y - min.y )*ss;			
-	//	if (diff_dist > EPSILON && p->state == ICE) {
-	//		norm.Set ( 0, 1, 0 );
-	//		adj = stiff * diff_dist - damp * norm.Dot ( p->vel_eval );
-	//		force_y = norm;
-	//		force_y *= adj;
-	//		force_y /= m_Param[SPH_PMASS];
-	//		anti_gravity += force_y;
-	//		touch_ground = true;
-	//		break;
-	//	}
-	//	diff_dist = 2 * radius - ( max.y - p->pos.y )*ss;
-	//	if (diff_dist > EPSILON && p->state == ICE) {
-	//		norm.Set ( 0, -1, 0 );
-	//		adj = stiff * diff_dist - damp * norm.Dot ( p->vel_eval );
-	//		force_y = norm;
-	//		force_y *= adj;
-	//		force_y /= m_Param[SPH_PMASS];
-	//		anti_gravity += force_y;
-	//		touch_ground = true;
-	//		break;
-	//	}
-	//}  // END FOR LOOP
-
-	bool touch_ground = adjustGravity();
-
-
-	// Calculate the ice-water force
-	i = 0;
-	double z_ice_force;
-	bool liquid = false;
-	for ( dat2 = mBuf[0].data; dat2 < dat1_end; dat2 += mBuf[0].stride, ++i) {
-		p = (Fluid*) dat2; 
-		if (p->state == ICE) {
-			for (int j = 0; j < m_NC[i]; ++j) {
-				pcurr = (Fluid*) (mBuf[0].data + m_Neighbor[i][j]*mBuf[0].stride);
-				if (pcurr->state == WATER){
-					dist = pcurr->pos;
-					dist -= p->pos;
-					float length  = dist.Length();
-					dist /= (length * length);
-
-					ice_force.x += ICE_WATER * K_ICE * dist.x;
-					ice_force.y += ICE_WATER * K_ICE * dist.y;
-					z_ice_force += ICE_WATER * K_ICE * dist.z;
-					//ice_force.z += ICE_WATER * K_ICE * dist.z;
-					liquid = true;
-				}
-			}  // END OF FINDING NEIGHBOR FOR-LOOP 
-		}  // END OF IF P->STATE IS SOLID
-	}  // EBD OF PARTICLE FOR-LOOP 	
-	if (liquid) {
-		if (!touch_ground) {
-			double anti_g = 9.8 /(m_Param[SPH_PMASS]);
-			if (z_ice_force > 0 && z_ice_force <= BOUND_LIQUID) {
-				//std::cout << "GREATER FORCE " << std::endl;
-				ice_force.z = anti_g - z_ice_force; //- 500;
-			} else {
-				//std::cout << "Ice _force " << z_ice_force << std::endl;
-				ice_force.z = anti_g - BOUND_LIQUID; //force.z;
-			}
-			// ice_force.z -= force_z;
-		}
-	}
-	// std::cout <<"ice force y " << ice_force.y << std::endl;
-	// ice_force.z -= 700;
-	//std::cout << "Force_z " << ice_force.z << std::endl;
-	//ice_force.z *= 1E-100000;
-	//ice_force.z = 0.0;
-	//ice_force.y = 0.0;
-	//ice_force.x = 0.0;
 	i = 0;
 	
-    for ( dat1 = mBuf[0].data; dat1 < dat1_end; dat1 += mBuf[0].stride, i++ ) {
-        // reset all instance variables
+	for ( dat1 = mBuf[0].data; dat1 < dat1_end; dat1 += mBuf[0].stride, i++ ) {
 		p = (Fluid*) dat1;
-		force.Set (0, 0, 0);
-        /*if (touch_ground && p->state == ICE) {
-			force.Set(anti_gravity.x, anti_gravity.y, anti_gravity.z);
-			force += ice_force;
-        } else if (p->state == ICE) {
-			force += ice_force;  
-        } */
 
-		if (touch_ground && p->state == 0) {
-            force.Set(anti_gravity.x, anti_gravity.y, anti_gravity.z);
-        } 
-		else {
-            force.Set (0, 0, 0);
-        }
-
-  //      
-		neighbor_temp = 0.0; sa = 0.0; Qi = 0.0;
-  //      pi = p->index.x;
-  //      pj = p->index.y;
-  //      pk = p->index.z;
-
-  //                  
-        for (int j=0; j < m_NC[i]; j++ ) { 
-			// Loop through all neighbors
-            pcurr = (Fluid*) (mBuf[0].data + m_Neighbor[i][j]*mBuf[0].stride);
-            dx = ( p->pos.x - pcurr->pos.x)*d; // dist in cm
-            dy = ( p->pos.y - pcurr->pos.y)*d;
-            dz = ( p->pos.z - pcurr->pos.z)*d;
-
-            c = ( mR - m_NDist[i][j] ); //distance between current and neighbor?
-            pterm = -0.5f * c * m_SpikyKern * ( p->pressure + pcurr->pressure) / m_NDist[i][j];
-            
-            dterm = c * p->density * pcurr->density;
-
-            vterm = m_LapKern * visc; 
-
-            diff = p->pos; // distance between particle and its neighbor
-            diff -= pcurr->pos;
-            length = diff.Length();
-
-            //lap_kern = m_LapKern * (m_Param[SPH_SMOOTHRADIUS] - length);
-			lap_kern =  45.0f/(3.141592 * pow(PARTICLE_PRADIUS, 6)) * (PARTICLE_PRADIUS - length);
-            //neighbor_temp += m_Param [ SPH_PMASS ] * ((pcurr->temp - p->temp)/pcurr->density) * lap_kern; // Newtonian Heat Transfer
-
-			// Calculate interfacial force 
-            if (p->state == WATER) {
-					
-				dist = pcurr->pos;
-				dist -= p->pos;
-				float length  = dist.Length();
-				dist /= (length * length);
-
-				// Water Particle
+		force.Set ( 0, 0, 0 );
+		for (int j=0; j < m_NC[i]; j++ ) {
+			pcurr = (Fluid*) (mBuf[0].data + m_Neighbor[i][j]*mBuf[0].stride);
+			dx = ( p->pos.x - pcurr->pos.x)*d;		// dist in cm
+			dy = ( p->pos.y - pcurr->pos.y)*d;
+			dz = ( p->pos.z - pcurr->pos.z)*d;				
+			c = ( mR - m_NDist[i][j] );
+			pterm = -0.5f * c * m_SpikyKern * ( p->pressure + pcurr->pressure) / m_NDist[i][j];
+			dterm = c * p->density * pcurr->density;
+			vterm = m_LapKern * visc;
+			if(p->state == WATER){
 				force.x += ( pterm * dx + vterm * (pcurr->vel_eval.x - p->vel_eval.x) ) * dterm;
 				force.y += ( pterm * dy + vterm * (pcurr->vel_eval.y - p->vel_eval.y) ) * dterm;
 				force.z += ( pterm * dz + vterm * (pcurr->vel_eval.z - p->vel_eval.z) ) * dterm;
-
-				if (pcurr->state == WATER) {
-					force.x += K_WATER * dist.x;
-					force.y += K_WATER * dist.y;
-					force.z += K_WATER * dist.z;
-				} else { //ICE
-					force.x += K_ICE * dist.x;
-					force.y += K_ICE * dist.y;
-					force.z += K_ICE * dist.z;
-				}
-            }  // END IF p->state is LIQUID
-        }  
-
-		if(force.z > 0){
-			int aadsf = 5;
+			}
 		}
-
-        p->sph_force = force;
-}
+		if(p->state == ICE){
+		//	force -= m_Vec[PLANE_GRAV_DIR];
+		//	force *= 1/m_Param[SPH_PMASS];
+		}
+		//p->sph_force = 0;
+		p->sph_force = force;
+	}
 	}
 
 void FluidSystem::TemperatureAdvection(){
@@ -1149,8 +917,16 @@ char *dat1, *dat1_end;
 			ambientTempEffect = heatValue / (SPECIFIC_HEAT_CAPACITY_WATER * MASS);
 		}
 		else{
+			double radius = m_Param[SPH_PRADIUS];
+			double ss = m_Param[SPH_SIMSCALE];
+			Vector3DF min = m_Vec[SPH_VOLMIN];
+			double diff = 2 * radius - ( p->pos.z - min.z - (p->pos.x - m_Vec[SPH_VOLMIN].x) * m_Param[BOUND_ZMIN_SLOPE] )*ss;
 			amountExposed = (voxelGrid->voxelSize[0] * voxelGrid->voxelSize[0])*(6.0 - voxelGrid->adjacencyList[p->index.x][p->index.y][p->index.z]);
 			heatValue = THERMAL_CONDUCTIVITY * (AMBIENT_TEMPERATURE - p->temp) * amountExposed;
+			if(diff > EPSILON){
+				heatValue += .05;
+			}
+
 			ambientTempEffect = heatValue / (SPECIFIC_HEAT_CAPACITY_ICE * MASS);
 			//ambientTempEffect = 0;
 		}
