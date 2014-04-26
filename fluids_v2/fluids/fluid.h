@@ -47,6 +47,7 @@
 		State			state;
         float           mass;
 		Vector3DI       index; //stores the location of the particle in a voxel grid for easy access
+		Vector3DF		torque;
 	};
 
 #endif /*PARTICLE_H_*/

@@ -106,6 +106,10 @@
 		VoxelGrid* voxelGrid; // lay over a grid to compute neighbors
 		bool adjustGravity();
 		Vector3DF anti_gravity;
+
+		void ComputeAngularVelocity();
+		Vector3DF center_of_mass;
+		float num_particles;
 		
 	private:
 

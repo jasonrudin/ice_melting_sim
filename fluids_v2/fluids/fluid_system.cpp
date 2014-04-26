@@ -73,6 +73,7 @@ void FluidSystem::Initialize ( int mode, int total )
 	AddAttribute ( 0, "state", sizeof ( enum State ), false );
 	AddAttribute ( 0, "mass", sizeof ( float ), false );
 	AddAttribute(0, "index", sizeof(Vector3DI), false);
+	AddAttribute(0, "torque", sizeof(Vector3DF), false);
 		
 	SPH_Setup ();
 	Reset ( total );	
@@ -126,6 +127,7 @@ int FluidSystem::AddPoint ()
 	f->total_surrounding_heat = 0;
 	f->state = ICE;
 	f->mass = MASS;
+	f->torque.Set(0,0,0);
 	return ndx;
 }
 
@@ -150,6 +152,7 @@ int FluidSystem::AddPointReuse ()
 	f->total_surrounding_heat = 0;
 	f->state = ICE;
 	f->mass = MASS;
+	f->torque.Set(0,0,0);
 	return ndx;
 }
 
@@ -212,21 +215,23 @@ void FluidSystem::Run ()
 
 			start.SetSystemTime ( ACC_NSEC );
 			Grid_InsertParticles ();
-			if ( bTiming) { stop.SetSystemTime ( ACC_NSEC ); stop = stop - start; printf ( "INSERT: %s\n", stop.GetReadableTime().c_str() ); }
+			//if ( bTiming) { stop.SetSystemTime ( ACC_NSEC ); stop = stop - start; printf ( "INSERT: %s\n", stop.GetReadableTime().c_str() ); }
 		
 			start.SetSystemTime ( ACC_NSEC );
 			SPH_ComputePressureGrid ();
-			if ( bTiming) { stop.SetSystemTime ( ACC_NSEC ); stop = stop - start; printf ( "PRESS: %s\n", stop.GetReadableTime().c_str() ); }
+			//if ( bTiming) { stop.SetSystemTime ( ACC_NSEC ); stop = stop - start; printf ( "PRESS: %s\n", stop.GetReadableTime().c_str() ); }
 
 			TemperatureAdvection();
 
 			start.SetSystemTime ( ACC_NSEC );
 			SPH_ComputeForceGridNC ();		
-			if ( bTiming) { stop.SetSystemTime ( ACC_NSEC ); stop = stop - start; printf ( "FORCE: %s\n", stop.GetReadableTime().c_str() ); }
+			//if ( bTiming) { stop.SetSystemTime ( ACC_NSEC ); stop = stop - start; printf ( "FORCE: %s\n", stop.GetReadableTime().c_str() ); }
+
+			ComputeAngularVelocity();
 
 			start.SetSystemTime ( ACC_NSEC );
 			Advance();
-			if ( bTiming) { stop.SetSystemTime ( ACC_NSEC ); stop = stop - start; printf ( "ADV: %s\n", stop.GetReadableTime().c_str() ); }
+			//if ( bTiming) { stop.SetSystemTime ( ACC_NSEC ); stop = stop - start; printf ( "ADV: %s\n", stop.GetReadableTime().c_str() ); }
 		}		
 		
 	#endif
@@ -808,7 +813,7 @@ void FluidSystem::SPH_ComputeForceGrid ()
 // Compute Forces - Using spatial grid with saved neighbor table. Fastest.
 void FluidSystem::SPH_ComputeForceGridNC ()
 {
-	char *dat1, *dat1_end;	
+	char *dat1, *dat1_end, *dat2;	
 	Fluid *p;
 	Fluid *pcurr;
 	Vector3DF force, fcurr;
@@ -828,17 +833,63 @@ void FluidSystem::SPH_ComputeForceGridNC ()
 
 	//find the correct anti-gravity force
 	bool touch_ground = adjustGravity();
+
+	//Determine the force between an ice particle and neighboring water particles
+	int k = 0;
+	Vector3DF ice_water_force;
+	bool hasLiquidNeighbor = false;
+	for(dat2 = mBuf[0].data; dat2 < dat1_end; dat2 += mBuf[0].stride, k++){
+		p = (Fluid*) dat2;
+		if(p->state == ICE){
+			for (int j=0; j < m_NC[i]; j++ ) {
+				pcurr = (Fluid*) (mBuf[0].data + m_Neighbor[k][j]*mBuf[0].stride);
+
+				if(pcurr->state == WATER){
+					Vector3DF dist = p->pos;
+					dist -= pcurr->pos;
+					float length = dist.Length();
+					dist  /= (length * length);
+
+					ice_water_force.x =	ICE_WATER * K_ICE * dist.x;
+					ice_water_force.y = ICE_WATER * K_ICE * dist.y;
+					ice_water_force.z = ICE_WATER * K_ICE * dist.z;
+
+					hasLiquidNeighbor = true;
+				}
+			}
+		}
+	}
+
+	if (hasLiquidNeighbor) {
+		if (!touch_ground) {
+			double anti_g = 9.8 /(m_Param[SPH_PMASS]);
+			if (ice_water_force.z > 0 && ice_water_force.z <= BOUND_LIQUID) {
+				//std::cout << "GREATER FORCE " << std::endl;
+				//ice_force.z = anti_g - z_ice_force; //- 500;
+				ice_water_force.z = anti_g - ice_water_force.z;
+			} else {
+				//std::cout << "Ice _force " << z_ice_force << std::endl;
+				ice_water_force.z = anti_g - BOUND_LIQUID; //force.z;
+			}
+			// ice_force.z -= force_z;
+		}
+	}
+
+
 	
 	for ( dat1 = mBuf[0].data; dat1 < dat1_end; dat1 += mBuf[0].stride, i++ ) {
 		p = (Fluid*) dat1;
 
 		if (touch_ground && p->state == ICE) {
             force.Set(anti_gravity.x, anti_gravity.y, anti_gravity.z);
+			//force += ice_water_force;
         } 
 		else {
             force.Set (0, 0, 0);
+			//force += ice_water_force;
         }
 
+		//Determine the interfacial forces between water and ice or water and water
 		for (int j=0; j < m_NC[i]; j++ ) {
 			pcurr = (Fluid*) (mBuf[0].data + m_Neighbor[i][j]*mBuf[0].stride);
 			dx = ( p->pos.x - pcurr->pos.x)*d;		// dist in cm
@@ -1098,4 +1149,42 @@ bool FluidSystem::adjustGravity(){
     }
 
 	return touch_ground;
+}
+
+void FluidSystem::ComputeAngularVelocity(){
+	// Loop through all the ice particles
+	char* dat1, *dat1_end;
+	int i = 0;
+	Fluid *p, *pcurr;
+	dat1_end = mBuf[0].data + NumPoints()*mBuf[0].stride;
+	Vector3DF neighbor_force;  // summation of the neighbor force both fluid and liquid
+	Vector3DF dist;  // distance from particle i to center of mass
+	
+	center_of_mass = Vector3DF(0,0,0);
+	num_particles = 0;
+
+	//First calculate the center of mass
+	for(dat1 = mBuf[0].data; dat1 < dat1_end; dat1 += mBuf[0].stride, i++){
+		p = (Fluid*) dat1;
+		if(p->state == ICE){
+			center_of_mass.x += p->pos.x;
+			center_of_mass.y += p->pos.y;
+			center_of_mass.z += p->pos.z;
+
+			num_particles  += 1;
+		}
+	}
+	center_of_mass /= num_particles;
+	std::cout << "COM: " << center_of_mass.x << ", " <<  center_of_mass.y << ", " << center_of_mass.z <<std::endl;
+	std::cout << num_particles << std::endl;
+	std::cout << "POS: " << p->pos.x << ", " << p->pos.y << ", " << p->pos.z << std::endl;
+
+	//calculate torque
+	for ( dat1 = mBuf[0].data; dat1 < dat1_end; dat1 += mBuf[0].stride, i++ ) {
+		p = (Fluid*) dat1;
+		if(p->state == ICE){
+			dist.Set(p->pos.x - center_of_mass.x, p->pos.y - center_of_mass.y, p->pos.z - center_of_mass.z);
+			p->torque = dist.Cross(p->sph_force);
+		}
+	}
 }
