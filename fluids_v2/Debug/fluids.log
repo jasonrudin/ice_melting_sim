@@ -1,9 +1,9 @@
-﻿Build started 4/26/2014 4:40:21 PM.
+﻿Build started 4/30/2014 11:35:55 PM.
      1>Project "C:\Users\Jason\Documents\Senior Design\senior_design\fluids_v2\fluids.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\fluids.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
-         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Ifluids /Icommon /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D FREEGLUT_STATIC /D _VC80_UPGRADE=0x0700 /D _MBCS /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt fluids\fluid.cpp fluids\fluid_system.cpp main.cpp
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Ifluids /Icommon /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D FREEGLUT_STATIC /D _VC80_UPGRADE=0x0700 /D _MBCS /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt fluids\fluid_system.cpp
          fluid_system.cpp
      1>c:\users\jason\documents\senior design\senior_design\fluids_v2\definitions.h(10): warning C4305: 'initializing' : truncation from 'double' to 'float'
      1>c:\users\jason\documents\senior design\senior_design\fluids_v2\definitions.h(11): warning C4305: 'initializing' : truncation from 'double' to 'float'
@@ -11,6 +11,8 @@
      1>c:\users\jason\documents\senior design\senior_design\fluids_v2\definitions.h(15): warning C4305: 'initializing' : truncation from 'double' to 'float'
      1>c:\users\jason\documents\senior design\senior_design\fluids_v2\definitions.h(16): warning C4305: 'initializing' : truncation from 'double' to 'float'
      1>c:\users\jason\documents\senior design\senior_design\fluids_v2\definitions.h(20): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>c:\users\jason\documents\senior design\senior_design\fluids_v2\definitions.h(25): warning C4305: 'initializing' : truncation from 'double' to 'const float'
+     1>c:\users\jason\documents\senior design\senior_design\fluids_v2\definitions.h(26): warning C4305: 'initializing' : truncation from 'double' to 'const float'
      1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(165): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
      1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(270): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
      1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(273): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
@@ -81,19 +83,19 @@
      1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(899): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
      1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(901): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
      1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(904): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(946): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(947): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
      1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(949): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(950): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(952): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(973): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(974): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
      1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(980): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(983): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(1000): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(1012): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(1015): warning C4305: '+=' : truncation from 'double' to 'float'
-     1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(1158): warning C4101: 'pcurr' : unreferenced local variable
-         Generating Code...
-         Skipping... (no relevant changes detected)
-         main.cpp
-         fluid.cpp
+     1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(1025): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(1028): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(1045): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(1057): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(1060): warning C4305: '+=' : truncation from 'double' to 'float'
+     1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(943): warning C4101: 'heatSourceTemp' : unreferenced local variable
+     1>c:\users\jason\documents\senior design\senior_design\fluids_v2\fluids\fluid_system.cpp(1203): warning C4101: 'pcurr' : unreferenced local variable
        ManifestResourceCompile:
          All outputs are up-to-date.
        Link:
@@ -129,4 +131,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:04.33
+Time Elapsed 00:00:03.62

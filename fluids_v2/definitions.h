@@ -22,7 +22,7 @@ static float PARTICLE_PRADIUS = 1.1;
 // Parameter for the ice-water particle
 static float ICE_WATER = -0.5;
 static float BOUND_LIQUID = 280;
-static const float K_WATER = 1.0;//0.01 ;//71.97;
-static const float K_ICE = 800.0; //* 10000;//75.64;
+static const float K_WATER = .05;//400;//1.0;//0.01 ;//71.97;
+static const float K_ICE = .2;//4000.0; //* 10000;//75.64;
 
 #endif DEFINITIONS

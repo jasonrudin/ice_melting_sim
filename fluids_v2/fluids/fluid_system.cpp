@@ -538,7 +538,7 @@ void FluidSystem::SPH_CreateExample ( int n, int nmax )
 	case 0:		// Square Ice
 
 		m_Vec [ SPH_VOLMIN ].Set ( -15, -15, 0 );
-		m_Vec [ SPH_VOLMAX ].Set ( 40, 40, 40 );
+		m_Vec [ SPH_VOLMAX ].Set ( 20, 20, 20 );
 		m_Vec [ SPH_INITMIN ].Set ( 0, 0, 5 );
 		m_Vec [ SPH_INITMAX ].Set ( 35, 35, 35 );
 		m_Vec [ PLANE_GRAV_DIR ].Set ( 0.0, 0, -9.8 );
@@ -693,7 +693,7 @@ void FluidSystem::SPH_ComputePressureGrid ()
 			p->pressure = ( p->density - m_Param[SPH_RESTDENSITY] ) * m_Param[SPH_INTSTIFF];
 		}
 		else{
-			p->pressure = ( p->density - m_Param[SPH_RESTDENSITY] ) * .3;
+			p->pressure = ( p->density - m_Param[SPH_RESTDENSITY] ) * m_Param[SPH_INTSTIFF];
 		}
 		p->density = 1.0f / p->density;		
 	}
@@ -909,20 +909,22 @@ void FluidSystem::SPH_ComputeForceGridNC ()
 				force.z += ( pterm * dz + vterm * (pcurr->vel_eval.z - p->vel_eval.z) ) * dterm;
 
 				if (pcurr->state == WATER) {
-					force.x += K_WATER * dist.x;
-					force.y += K_WATER * dist.y;
-					force.z += K_WATER * dist.z;
+					force.x += K_WATER * dist.x / (length * length);
+					force.y += K_WATER * dist.y / (length * length);
+					force.z += K_WATER * dist.z / (length * length);
 				} 
 				else {
-					force.x += K_ICE * dist.x;
-					force.y += K_ICE * dist.y;
-					force.z += K_ICE * dist.z;
+
+					
+					force.x += K_ICE * dist.x / (length * length);
+					force.y += K_ICE * dist.y/ (length * length);
+					force.z += K_ICE * dist.z / (length * length);
+
+					//if(p->pos.z > pcurr->pos.z){
+					//	force.z += anti_gravity.z;
+					//}
 				}
 			}
-		}
-		if(p->state == ICE){
-		//	force -= m_Vec[PLANE_GRAV_DIR];
-		//	force *= 1/m_Param[SPH_PMASS];
 		}
 		//p->sph_force = 0;
 		p->sph_force = force;
@@ -938,6 +940,7 @@ char *dat1, *dat1_end;
 	float SmoothingKernelFunction;
 	float tempDiff, totalNeighborTemp;
 	float heatValue, amountExposed, ambientTempEffect;
+	float heatSourceTemp;
 	int i;
 	float c, d;
 	float dx, dy, dz;
@@ -950,9 +953,51 @@ char *dat1, *dat1_end;
 
 	dat1_end = mBuf[0].data + NumPoints()*mBuf[0].stride;
 	i = 0;
+
+	//temp advection from a location in space (heat source)
+	//find location of heat source, create the ray
+	//39, -60, 43
+	Vector3DF heatPosition = Vector3DF(20, 20, 5);
+	Vector3DF dirdir = heatPosition;
+	dirdir -= Vector3DF(-20,-20,5);
+	Vector3DF direction = dirdir.Normalize();
+	float distance = 1000;
+	Fluid* closestPoint;
+	int location;
+	//iterate through all of the particles to find the particle that is closest (smallest t) and that intersects the ray
+	for ( dat1 = mBuf[0].data; dat1 < dat1_end; dat1 += mBuf[0].stride, i++ ) {
+		p = (Fluid*) dat1;
+		Vector3DF distToHeat = p->pos;
+		distToHeat -= heatPosition;
+		Vector3DF dotProd = distToHeat.Cross(direction);
+		float num = dotProd.Length();
+		float denom = direction.Length();
+		float tempdistance = num / denom;
+		if(tempdistance <= .3){
+			Vector3DF closest = heatPosition;
+			closest -= p->pos;
+			if(closest.Length() < distance){
+				distance = closest.Length();
+				closestPoint = p;
+				location = i;
+			}
+		}
+	}
+
+	if(distance != 1000){
+		for (int j=0; j < m_NC[location]; j++ ) {
+			pcurr = (Fluid*) (mBuf[0].data + m_Neighbor[location][j]*mBuf[0].stride);
+			pcurr->total_surrounding_heat += 5;
+			closestPoint->total_surrounding_heat += 50;
+		}
+	}
+
+	//std::cout << distance << std::endl;
+	//with this particle (if it exists) find its neighbors and add some temp
 	
 	
 	//temperature change between particles
+	i = 0;
 	for ( dat1 = mBuf[0].data; dat1 < dat1_end; dat1 += mBuf[0].stride, i++ ) {
 		p = (Fluid*) dat1;
 		totalNeighborTemp = 0;
@@ -1027,7 +1072,7 @@ char *dat1, *dat1_end;
 			int abc = 2;
 		}
 
-		p->total_surrounding_heat = totalNeighborTemp + ambientTempEffect;
+		p->total_surrounding_heat += totalNeighborTemp + ambientTempEffect;
 
 		
 
